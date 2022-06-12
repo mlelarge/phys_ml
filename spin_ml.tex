@@ -1,0 +1,461 @@
+\documentclass[12pt,nocut]{article}
+
+\usepackage{latex_style/packages}
+\usepackage{latex_style/notations}
+
+\title{Spin models and ML}
+\date{}
+
+\begin{document}
+
+\maketitle{}
+
+\section{Intro}
+Bla
+
+\section{Bayes-optimal inference}\label{chap:gaussian}
+We introduce in this chapter some general properties of Bayes-optimal inference, that will be used repeatedly in the sequel.
+Let us first define what we mean by \textit{Bayes-optimal inference}.
+
+We consider a statistical problem where we would like to recover a signal vector $\bbf{X} \in \R^n$ from some observations $\bbf{Y} \in \R^m$.
+We assume that $(\bbf{X},\bbf{Y})$ is drawn from some probability distribution $\mu$ over $\R^{n} \times \R^m$. Given a performance criterion, a Bayes-optimal estimator (or simply Bayes estimator) is an estimator of $\bbf{X}$ given $\bbf{Y}$ that achieves the best performance for this criterion. For instance if we measure the performance of an estimator $\what{\bbf{x}}$ by its mean square error $\MSE(\what{\bbf{x}}) = \E \| \bbf{X} - \what{\bbf{x}}(\bbf{Y}) \|^2$, then the Bayes-optimal estimator is simply the posterior mean $\what{\bbf{x}}^{\rm Bayes}(\bbf{Y}) = \E[\bbf{X}|\bbf{Y}]$.
+\\
+
+The goal of this chapter is to present some general properties of Bayes-optimal estimators. In Section~\ref{sec:nishimori} we introduce what we will call (according to the statistical physics terminology) the ``Nishimori identity'' which is nothing more than a rewriting of Bayes rule.
+In Section~\ref{sec:performance} we will study the links between various natural performance metrics for estimators and show that they are in some sense equivalent.
+In Sections~\ref{sec:i_mmse} we analyse the special case where $\bbf{Y} = \sqrt{\lambda}\bbf{X} + \bbf{Z}$, where $\lambda \geq 0$ and $\bbf{Z}$ is some Gaussian noise. This is the starting point of the study of the ``spiked'' matrix and tensor models. Finally we consider in Section~\ref{sec:rem} a simple example to illustrate the tools of this chapter.
+
+\section{The Nishimori identity}\label{sec:nishimori}
+
+In order to analyze Bayes-optimal estimators, we will need to examine the posterior distribution of $\bbf{X}$ given $\bbf{Y}$.
+To do so we will often consider i.i.d.\ samples $\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}$ from the posterior distribution $P( \cdot \, | \, \bbf{Y} )$, independently of everything else. Such samples are called replicas. The (obvious) identity below (which is simply Bayes rule)
+is named after the works of Nishimori \cite{nishimori1980exact,nishimori1981internal} on ``gauge-symmetric'' spin glasses.
+It states that the planted solution $\bbf{X}$ behaves like a replica.
+
+\begin{proposition}[Nishimori identity] \label{prop:nishimori}
+	Let $(\bbf{X},\bbf{Y})$ be a couple of random variables on a polish space. Let $k \geq 1$ and let $\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}$ be $k$ i.i.d.\ samples (given $\bbf{Y}$) from the distribution $\P(\bbf{X}=\cdot \, | \, \bbf{Y})$, independently of every other random variables. Let us denote $\langle \cdot \rangle$ the expectation with respect to $\P(\bbf{X}=\cdot \, | \, \bbf{Y})$ and $\E$ the expectation with respect to $(\bbf{X},\bbf{Y})$. Then, for all continuous bounded function $f$
+	$$
+	\E \big\langle f(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}) \big\rangle
+	=
+	\E \big\langle f(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k-1)}, \bbf{X}) \big\rangle\,.
+	$$
+\end{proposition}
+\begin{proof}
+It is equivalent to sample the couple $(\bbf{X},\bbf{Y})$ according to its joint distribution or to sample first $\bbf{Y}$ according to its marginal distribution and then to sample $\bbf{X}$ conditionally to $\bbf{Y}$ from its conditional distribution $\P(\bbf{X}=\cdot \,|\,\bbf{Y})$. Thus the $(k+1)$-tuple $(\bbf{Y},\bbf{x}^{(1)}, \dots,\bbf{x}^{(k)})$ is equal in law to $(\bbf{Y},\bbf{x}^{(1)},\dots,\bbf{x}^{(k-1)},\bbf{X})$.
+\end{proof}
+
+
+\section{Performance measure and optimal estimators}\label{sec:performance}
+
+We consider two random vectors $\bbf{X}$ and $\bbf{Y}$ that live respectively in $\R^n$ and $\R^m$. 
+We assume (for simplicity) that $\|\bbf{X}\| = 1$ almost surely. 
+As explained above, given the observations $\bbf{Y}$, our goal is to estimate $\bbf{X}$ with an estimator $\what{\bbf{x}}(\bbf{Y})$. 
+In order to evaluate the performance of such an estimator, what criterion should we take?
+
+The probably most natural way to characterize the performance of $\what{\bbf{x}}$ is by its mean-squared error:
+$$
+\MSE(\what{\bbf{x}}) = \E \| \bbf{X} - \what{\bbf{x}}(\bbf{Y}) \|^2.
+$$
+By Pythagorean theorem, we know that the optimal estimator which respect to this metric is the posterior mean $\what{\bbf{x}}(\bbf{Y}) = \E[\bbf{X}| \bbf{Y}]$ which achieves the minimal mean square error:
+\begin{equation}\label{eq:def_mmse0}
+	\MMSE(\bbf{X}|\bbf{Y}) \defeq \E \| \bbf{X} - \E[\bbf{X}|\bbf{Y}] \|^2.
+\end{equation}
+
+However, the MSE is not always an appropriate criterion. Indeed in many cases it is only possible to recover $\bbf{X}$ up to its sign: think for instance of the Spiked Wigner Model $\bbf{Y} = \bbf{X}\bbf{X}^{\sT} + {\rm Noise}$ with $\bbf{X} \sim \Unif(\mathbb{S}^{n-1})$. In such case, $\E[\bbf{X}|\bbf{Y}] = 0$: the best estimator in term of MSE does not even depend on the observations $\bbf{Y}$!
+\\
+
+For this kind of problems one should rather consider the correlation (also known as cosine similarity) \textit{in absolute value} between $\what{\bbf{x}}$ and the signal $\bbf{X}$:
+\begin{equation}\label{eq:correlation_metric}
+\sup_{\|\what{\bbf{x}}\| = 1} \E\big[|(\what{\bbf{x}}(\bbf{Y}); \bbf{X})|\big]
+\qquad \text{or} \qquad
+\sup_{\|\what{\bbf{x}}\| = 1} \E\big[(\what{\bbf{x}}(\bbf{Y}); \bbf{X})^2\big],
+\end{equation}
+where $(\cdot; \cdot)$ denotes the Euclidean inner product and where the suprema are taken over all estimators $\what{\bbf{x}}: \R^m \to \mathbb{S}^{n-1}$.
+%The optimal estimator with respect to these metrics is however not obvious anymore!
+\\
+
+Let us introduce some notations. We will use the Gibbs Bracket $\langle \cdot \rangle$ to write expectations with respect to the posterior distribution of $\bbf{X}$ given $\bbf{Y}$:
+$$
+\langle f(\bbf{x}) \rangle = \E[f(\bbf{X})|\bbf{Y}],
+$$
+for all measurable function $f$ such that $f(\bbf{X})$ is integrable.
+In particular, we will be interested by the $n \times n$ positive semi-definite (random) matrix:
+\begin{equation}\label{eq:def_M}
+\bbf{M} \defeq \langle \bbf{x} \bbf{x}^{\sT} \rangle = \E[\bbf{X}\bbf{X}^{\sT}|\bbf{Y}].
+\end{equation}
+$\bbf{M}$ is the Bayes-optimal estimator (in terms of mean square error) for estimating the matrix $\bbf{X} \bbf{X}^{\sT}$:
+\begin{equation}\label{eq:def_matrix_mse}
+\MMSE(\bbf{X}\bbf{X}^{\sT}|\bbf{Y}) = \E \| \bbf{X}\bbf{X}^{\sT} - \E[\bbf{X}\bbf{X}^{\sT}|\bbf{Y}] \|^2.
+\end{equation}
+An easy computation gives $\MMSE(\bbf{X}\bbf{X}^{\sT}|\bbf{Y}) = 1 - \E [\Tr(\bbf{M}^2)]$.
+The matrix $\bbf{M}$ is also related to the second quantity of \eqref{eq:correlation_metric} through its largest eigenvalue $\lambda_{\rm max}(\bbf{M})$:
+\begin{lemma}\label{lem:lambda_max}
+	$$
+	\sup_{\|\what{\bbf{x}}\| = 1} \E\big[(\what{\bbf{x}}(\bbf{Y}); \bbf{X})^2\big] = \E\big[\lambda_{\rm max}(\bbf{M})\big]
+	$$
+	and the optimal estimator for this metric is a unit eigenvector of $\bbf{M}$ associated to its largest eigenvalue $\lambda_{\rm max}(\bbf{M})$.
+\end{lemma}
+\begin{proof}
+Let $\what{\bbf{x}}$ be an estimator of $\bbf{X}$. By the Nishimori identity (Proposition~\ref{prop:nishimori}), we have
+	\begin{align*}
+\E\big[(\what{\bbf{x}}(\bbf{Y}); \bbf{X})^2\big]
+&=
+\E\big[\what{\bbf{x}}(\bbf{Y})^{\sT} \bbf{X}\bbf{X}^{\sT} \what{\bbf{x}}(\bbf{Y})\big]
+=
+\E\big[\langle \what{\bbf{x}}(\bbf{Y})^{\sT} \bbf{x}\bbf{x}^{\sT} \what{\bbf{x}}(\bbf{Y}) \rangle\big]
+=
+\E\big[ \what{\bbf{x}}(\bbf{Y})^{\sT} \bbf{M} \what{\bbf{x}}(\bbf{Y}) \big],
+	\end{align*}
+	the lemma follows.
+\end{proof}
+\\
+
+%We know now what are the optimal estimators corresponding to
+%$\MMSE(\bbf{X}\bbf{X}^{\sT}|\bbf{Y})$ and $\sup_{\|\what{\bbf{x}}\| = 1} \E\big[(\what{\bbf{x}}(\bbf{Y}); \bbf{X})^2\big]$, and thanks to the inequality $\lambda_{\rm max}(\bbf{M})^2 \leq \Tr(\bbf{M}^2)$ we are able to compare the two performance measures.
+
+%However, this is not the case for the criteria $\E\left[\left|(\what{\bbf{x}}(\bbf{Y}); \bbf{X})\right|\right]$, for which we do not know the optimal estimator. 
+%Further, assume that we aim at estimating the rank-one matrix $\bbf{X}\bbf{X}^{\sT}$, should we use $\bbf{M}$ (which will typically not be rank-one) or $\what{\bbf{v}} \what{\bbf{v}}^{\sT}$ where $\what{\bbf{v}}$ is the leading unit eigenvector of $\bbf{M}$?
+
+Lemma~\ref{lem:lambda_max} tells us that the top unit eigenvector $\what{\bbf{v}}$ of $\bbf{M}$ maximizes $\E\left[(\what{\bbf{x}}(\bbf{Y}); \bbf{X})^2\right]$.
+In the following, we will show that under a simple condition (that will hold for the models we consider in this manuscript), the estimator $\what{\bbf{v}}$ is ``asymptotically optimal'' (in the limit of large dimension) for the two metrics \eqref{eq:correlation_metric} and $\lambda_{\rm max} \what{\bbf{v}} \what{\bbf{v}}^{\sT}$ is optimal for the estimation of $\bbf{X}\bbf{X}^{\sT}$ in terms of mean square error.
+\\
+
+To introduce this condition and the asymptotic limit, we need to consider to a sequence of inference problems. We assume that for all $n \geq 1$ we have two random vectors $\bbf{X}_{[n]}$ and $\bbf{Y}_{[n]}$ respectively in $\mathbb{S}^{n-1}$ and $\R^{m_n}$, for some sequence $(m_n)_{n \geq 1}$. Our goal is again to estimate $\bbf{X}_{[n]}$ from the observation of $\bbf{Y}_{[n]}$ when $n$ is very large: we would like for instance to compute the limits of \eqref{eq:correlation_metric} and \eqref{eq:def_matrix_mse} as $n \to \infty$.
+Moreover, we would like to know which estimators are ``asymptotically optimal'', i.e.\ whose performance reach in the $n \to \infty$ limit the optimal one.
+In the following, in order to simplify the notations, we will write $\bbf{X}$ and $\bbf{Y}$ instead of $\bbf{X}_{[n]}$ and $\bbf{Y}_{[n]}$.
+
+
+\begin{proposition}\label{prop:lambda_max}
+	Let us denote by $G_n$ the posterior distribution of $\bbf{X}$ given $\bbf{Y}$. Notice that $G_n$ is a random probability distributions on $\mathbb{S}^{n-1}$.
+	Assume that there exists $q \in [0,1]$ such that
+	for $\bbf{x}^{(1)},\bbf{x}^{(2)} \iid G_n$ we have
+	\begin{equation}\label{eq:rs_condition}
+	\big|\big(\bbf{x}^{(1)}; \bbf{x}^{(2)}\big)\big| \xrightarrow[n \to \infty]{\rm (d)} q.
+	\end{equation}
+	Then $\Tr(\bbf{M}^2) \xrightarrow[n \to \infty]{\rm (d)} q^2$ and
+	$$
+	\lambda_{\rm max}(\bbf{M}) \xrightarrow[n \to \infty]{\rm (d)} q.
+	$$
+\end{proposition}
+\begin{proof}
+	%Since $\|\bbf{X}\| = 1$ almost surely we have $\Tr(\bbf{M}) = \langle \|\bbf{x}\|^2 \rangle = 1$. 
+	Let us compute $\Tr(\bbf{M}^2) = \Tr \big(\langle \bbf{x} \bbf{x}^{\sT} \rangle \langle \bbf{x} \bbf{x}^{\sT} \rangle \big) = \langle (\bbf{x}^{(1)}; \bbf{x}^{(2)})^2 \rangle \xrightarrow[n \to \infty]{} q^2$,
+	by assumption. 
+	If $q =0$, then the result is obvious since $\lambda_{\rm max}(\bbf{M})^2 \leq \Tr(\bbf{M}^2)$.
+
+	Notice that $\Tr(\bbf{M}^3) \leq \lambda_{\rm max}(\bbf{M}) \Tr(\bbf{M}^2)$, so it suffices to show that
+$$
+{\rm Tr}(\bbf{M}^3) = \big\langle (\bbf{x}^{(1)};\bbf{x}^{(2)}) (\bbf{x}^{(2)};\bbf{x}^{(3)}) (\bbf{x}^{(3)};\bbf{x}^{(1)}) \big\rangle
+\xrightarrow[n \to \infty]{} q^3,
+$$
+for $\bbf{x}^{(1)},\bbf{x}^{(2)},\bbf{x}^{(3)} \iid G_n$. This follows from Lemma~\ref{lem:positivity} below.
+\end{proof}
+\\
+
+\begin{lemma}\label{lem:positivity}
+	Under the assumptions of Proposition~\ref{prop:lambda_max}, we have for $\bbf{x}^{(1)},\bbf{x}^{(2)},\bbf{x}^{(3)} \iid G_n$,
+$$
+(\bbf{x}^{(1)};\bbf{x}^{(2)}) (\bbf{x}^{(2)};\bbf{x}^{(3)}) (\bbf{x}^{(3)};\bbf{x}^{(1)}) \xrightarrow[n \to \infty]{\rm (d)} q^3.
+$$
+\end{lemma}
+Lemma~\ref{lem:positivity} will be proved in Appendix~\ref{sec:proof_positivity}.
+From Proposition~\ref{prop:lambda_max} we deduce the main result of this section:
+
+\begin{proposition}\label{prop:lim_error_metrics}
+	Let $\what{\bbf{v}}$ be a leading unit eigenvector of $\bbf{M}$ (which is defined by \eqref{eq:def_M}).
+	Under the assumptions of Proposition~\ref{prop:lambda_max}, we have
+	\begin{equation}\label{eq:lim_leading}
+	| (\what{\bbf{v}}; \bbf{X}) | \xrightarrow[n \to \infty]{\rm (d)} \sqrt{q}.
+	\end{equation}
+Further $\lim\limits_{n \to \infty} \MMSE(\bbf{X}\bbf{X}^{\sT}|\bbf{Y}) = 1 - q^2$, 
+\begin{equation}\label{eq:lim_correlation_metric}
+	\lim_{n \to \infty} \sup_{\|\what{\bbf{x}}\| = 1} \E\big[|(\what{\bbf{x}}(\bbf{Y}); \bbf{X})|\big] = \sqrt{q},
+	\qquad \text{and} \qquad
+\lim_{n \to \infty} \sup_{\|\what{\bbf{x}}\| = 1} \E\big[(\what{\bbf{x}}(\bbf{Y}); \bbf{X})^2\big] = q.
+\end{equation}
+\end{proposition}
+\begin{proof}
+	Let us abbreviate $\lambda_{\rm max} \defeq \lambda_{\rm max}(\bbf{M})$.
+	By Lemma~\ref{lem:lambda_max}  and Proposition~\ref{prop:lambda_max} we have
+	\begin{equation}\label{eq:lim2v}
+	\E\big[(\what{\bbf{v}}; \bbf{X})^2\big] = \E[\lambda_{\rm max}] \xrightarrow[n \to \infty]{} q.
+	\end{equation}
+	Hence if $q=0$, the Proposition follows easily. Assume now that $q > 0$.
+	Using Pythagorean Theorem and the Nishimori identity (Proposition~\ref{prop:nishimori}) we get
+	\begin{align*}
+		\E \| \bbf{X}^{\otimes 4} - \lambda_{\rm max}^2 \what{\bbf{v}}^{\otimes 4} \|^2
+		&\geq
+		\E \| \bbf{X}^{\otimes 4} - \langle \bbf{x}^{\otimes 4}\rangle \|^2
+		\\
+		&=
+		1 + \E \big[ \big( \langle \bbf{x}^{\otimes 4}\rangle ; \langle \bbf{x}^{\otimes 4}\rangle \big) \big]
+		- 2 \E \big[\big( \bbf{X}^{\otimes 4} ; \langle \bbf{x}^{\otimes 4}\rangle\big) \big]
+		\\
+		&= 1 - \E \left[ \left\langle (\bbf{x}^{(1)}; \bbf{x}^{(2)})^4 \right\rangle \right]
+		\xrightarrow[n \to \infty]{} 1 - q^4,
+	\end{align*}
+	where the last limit follows from the assumption \eqref{eq:rs_condition}. Since
+	$$
+		\E \| \bbf{X}^{\otimes 4} - \lambda_{\rm max}^2 \what{\bbf{v}}^{\otimes 4} \|^2
+		= 1 + \E\big[\lambda_{\rm max}^4\big] - 2 \E\big[\lambda_{\rm max}^2 (\bbf{X};\what{\bbf{v}})^4\big],
+	$$
+	using Proposition~\ref{prop:lambda_max}, we deduce (recall that we assumed $q >0$) that $\limsup_{n \to \infty} \E\big[(\what{\bbf{v}}; \bbf{X})^4\big] \leq q^2$. Together with \eqref{eq:lim2v} this gives that $|(\what{\bbf{v}}; \bbf{X})| \xrightarrow[n \to \infty]{} \sqrt{q}$.
+
+	The next point is a consequence of Proposition~\ref{prop:lambda_max} because
+	$\MMSE(\bbf{X}\bbf{X}^{\sT}|\bbf{Y}) = 1 - \E [\Tr(\bbf{M}^2)]$. To prove \eqref{eq:lim_correlation_metric} simply notice that
+	$$
+	\E\big[|(\what{\bbf{v}};\bbf{X})|\big]^2
+	\leq \sup_{\|\what{\bbf{x}}\| = 1} \E\big[|(\what{\bbf{x}}(\bbf{Y}); \bbf{X})|\big]^2
+	\leq
+	\sup_{\|\what{\bbf{x}}\| = 1} \E\big[(\what{\bbf{x}}(\bbf{Y}); \bbf{X})^2\big] = 
+	\E[\lambda_{\rm max}],
+	$$
+	which proves \eqref{eq:lim_correlation_metric} using \eqref{eq:lim_leading} and Proposition~\ref{prop:lambda_max}. 
+\end{proof}
+\\
+
+From Proposition~\ref{prop:lim_error_metrics}, we deduce that the estimator $\what{\bbf{A}} \defeq \lambda_{\rm max}(\bbf{M}) \, \what{\bbf{v}}\what{\bbf{v}}^{\sT}$ achieves asymptotically the minimal mean square error for the estimation of $\bbf{X}\bbf{X}^{\sT}$:
+$$
+\lim_{n \to \infty} \E \| \bbf{X} \bbf{X}^{\sT} - \what{\bbf{A}} \|^2 = 1-q^2.
+$$
+
+\begin{remark}\label{rem:cosine}
+For simplicity we assumed in this section that $\|\bbf{X}\|^2 = 1$ almost surely. However we will need to work in the next chapters under a slightly weaker condition, namely $\|\bbf{X}\|^2 \xrightarrow[n \to \infty]{} 1$. It is not difficult to modify the proofs of this section to see that Lemma~\ref{lem:lambda_max}, Proposition~\ref{prop:lambda_max}, Lemma~\ref{lem:positivity} and Proposition~\ref{prop:lim_error_metrics} still hold, provided that $\|\bbf{X}\|^2 \xrightarrow[n \to \infty]{} 1$ for the Wasserstein distance of order $4$ (i.e.\ $\|\bbf{X}\|^2 \xrightarrow[n \to \infty]{} 1$ in distribution and $\E \|\bbf{X}\|^8 \xrightarrow[n \to \infty]{} 1$).
+\end{remark}
+
+
+
+\section{Bayesian inference with Gaussian noise}\label{sec:i_mmse}
+
+We will now focus on the following model:
+\begin{equation}\label{eq:inference}
+	\bbf{Y} = \sqrt{\lambda} \, \bbf{X} + \bbf{Z} \,,
+\end{equation}
+where the signal $\bbf{X}$ is sampled according to some probability distribution $P_X$ over $\R^n$, and where the noise $\bbf{Z} =(Z_1, \dots, Z_n) \iid \cN(0,1)$ is independent from $\bbf{X}$. In Chapters~\ref{sec:xx} and~\ref{sec:uv}, $\bbf{X}$ will typically be a low-rank matrix. The parameter $\lambda \geq 0$ plays the role of a signal-to-noise ratio.
+We assume that $P_X$ admits a finite second moment: $\E \|\bbf{X}\|^2 < \infty$.
+
+Given the observation channel~\eqref{eq:inference}, the goal of the statistician is to estimate $\bbf{X}$ given the observations $\bbf{Y}$. Again, we assume to be in the ``Bayes-optimal'' setting, where the statistician knows all the parameters of the inference model, that is the prior distribution $P_X$ and the signal-to-noise ratio $\lambda$. We measure the performance of an estimator $\widehat{\theta}$ (i.e.\ a measurable function of the observations $\bbf{Y}$) by its Mean Squared Error $\MSE(\widehat{\theta}) = \E \| \bbf{X} - \widehat{\theta}(\bbf{Y}) \|^2$.
+One of our main quantity of interest will be the Minimum Mean Squared Error
+$$
+\MMSE(\lambda) \defeq \min_{\widehat{\theta}} \MSE(\widehat{\theta}) = \E \left[ \left\| \bbf{X} - \E[\bbf{X}|\bbf{Y}] \right\|^2 \right],
+$$
+where the minimum is taken over all measurable function $\widehat{\theta}$ of the observations $\bbf{Y}$.
+Since the optimal estimator (in term of Mean Squared Error) is the posterior mean of $\bbf{X}$ given $\bbf{Y}$, a natural object to study is the posterior distribution of $\bbf{X}$.
+By Bayes rule, the posterior distribution of $\bbf{X}$ given $\bbf{Y}$ is
+\begin{equation}\label{eq:posterior_0}
+	dP( \bbf{x} \, | \, \bbf{Y}  ) 
+	= \frac{1}{\cZ(\lambda,\bbf{Y})} e^{H_{\lambda,\bbf{Y}}(\bbf{x})} dP_X(\bbf{x}) \,,
+\end{equation}
+where 
+$$
+H_{\lambda,\bbf{Y}}(\bbf{x})=
+\sqrt{\lambda}\, \bbf{x}^{\sT} \bbf{Y} - \frac{\lambda}{2} \| \bbf{x} \|^2
+=
+\sqrt{\lambda} \, \bbf{x}^{\sT} \bbf{Z} + \lambda \, \bbf{x}^{\sT} \bbf{X} - \frac{\lambda}{2} \| \bbf{x} \|^2 \,.
+$$
+\begin{definition}
+	$H_{\lambda,\bbf{Y}}$ is called the Hamiltonian\protect\footnotemark and the normalizing constant
+	$$
+	\cZ(\lambda,\bbf{Y}) = \int dP_X(\bbf{x}) e^{H_{\lambda,\bbf{Y}}(\bbf{x})}
+	$$
+	is called the partition function. 
+\end{definition}
+\footnotetext{According to the physics convention, this should be minus the Hamiltonian, since a physical system tries to minimize its energy. However, we chose here to remove it for simplicity.}
+Expectations with respect the posterior distribution~\eqref{eq:posterior_0} will be denoted by the Gibbs brackets $\langle \cdot \rangle_{\lambda}$:
+$$
+\big\langle f(\bbf{x}) \big\rangle_{\lambda}
+= \E \big[f(\bbf{X})|\bbf{Y} \big]
+= \frac{1}{\cZ(\lambda,\bbf{Y})} \int dP_X(\bbf{x}) f(\bbf{x}) e^{H_{\lambda,\bbf{Y}}(\bbf{x})} \,,
+$$
+for any measurable function $f$ such that $f(\bbf{X})$ is integrable.
+
+\begin{definition}
+	$F(\lambda) = \E \log \cZ(\lambda,\bbf{Y})$ is called the free energy\footnotemark. It is related to the mutual information between $\bbf{X}$ and $\bbf{Y}$ by
+	\begin{equation}\label{eq:f_i}
+		F(\lambda) = \frac{\lambda}{2} \E \| \bbf{X} \|^2 - I(\bbf{X};\bbf{Y})\,.
+	\end{equation}
+\end{definition}
+\footnotetext{This is in fact minus the free energy, but we chose to remove the minus sign for simplicity.}
+\begin{proof}
+	The mutual information $I(\bbf{X};\bbf{Y})$ is defined as the Kullback-Leibler divergence between $P_{(X,Y)}$, the joint distribution of $(\bbf{X},\bbf{Y})$ and $P_X \! \otimes \! P_Y$ the product of the marginal distributions of $\bbf{X}$ and $\bbf{Y}$. $P_{(X,Y)}$ is absolutely continuous with respect to $P_X \otimes P_Y$ with Radon-Nikodym derivative:
+	$$
+	\frac{d P_{(X,Y)}}{d P_X \! \otimes \! P_Y}(\bbf{X},\bbf{Y})
+	=
+	\frac{\exp\left(-\frac{1}{2}\| \bbf{Y} - \sqrt{\lambda} \bbf{X} \|^2\right)}{\int \exp\left(-\frac{1}{2}\| \bbf{Y} - \sqrt{\lambda} \bbf{x} \|^2\right) dP_X(\bbf{x})} \,.
+	$$
+	Therefore
+	\begin{align*}
+		I(\bbf{X};\bbf{Y}) 
+		&= \E \log\left( \frac{d P_{(X,Y)}}{d P_X \!\otimes \!P_Y}(\bbf{X},\bbf{Y}) \right)
+		= - \E \log \int dP_X(\bbf{x}) \exp \left( \sqrt{\lambda} \bbf{x}^{\sT} \bbf{Y} - \sqrt{\lambda} \bbf{X}^{\sT} \bbf{Y} - \frac{\lambda}{2} \|\bbf{x}\|^2 + \frac{\lambda}{2}\|\bbf{X}\|^2 \right)
+		\\
+		&= - F(\lambda) + \frac{\lambda}{2} \E \| \bbf{X} \|^2 \,.
+	\end{align*}
+\end{proof}
+
+We state now two basic properties of the $\MMSE$. A more detailed analysis can be found in~\cite{guo2011estimation,wu2012functional}.
+\begin{proposition}\label{prop:mmse_dec}
+	$\lambda \mapsto \MMSE(\lambda)$ is non-increasing over $\R_{\geq 0}$. 
+	%If $P_X$ is not a Dirac mass, then $\MMSE$ is strictly decreasing on $\R_{\geq 0}$.
+	Moreover
+	\begin{itemize}
+		\item $\MMSE(0) = \E\|\bbf{X} - \E[\bbf{X}]\|^2$,
+		\item $\MMSE(\lambda) \xrightarrow[\lambda \to +\infty]{} 0$.
+	\end{itemize}
+\end{proposition}
+\begin{proposition}\label{prop:mmse_cont}
+	$\lambda \mapsto \MMSE(\lambda)$ is continuous over $\R_{\geq 0}$.
+\end{proposition}
+The proofs of Proposition~\ref{prop:mmse_dec} and~\ref{prop:mmse_cont} can respectively be found in Appendix~\ref{sec:proof_mmse_dec} and~\ref{sec:proof_mmse_cont}.
+\\
+
+We present now the very useful ``I-MMSE'' relation from~\cite{guo2005mutual}. This relation was previously known (under a different formulation) as ``de Brujin identity'' see \cite[Equation 2.12]{stam1959some}.
+\begin{proposition}\label{prop:i_mmse}
+	For all $\lambda \geq 0$,
+	\begin{equation}\label{eq:i_mmse}
+		\frac{\partial}{\partial \lambda} I(\bbf{X};\bbf{Y}) = \frac{1}{2} \MMSE(\lambda)
+		\qquad \text{and} \qquad
+		F'(\lambda) = \frac{1}{2} \E \langle \bbf{x}^{\sT} \bbf{X} \rangle_{\lambda} 
+		= \frac{1}{2} \big(\E \| \bbf{X}\|^2 - \MMSE(\lambda) \big)
+		\,.
+	\end{equation}
+	$F$ thus is a convex, differentiable, non-decreasing, and $\frac{1}{2}\E\|\bbf{X}\|^2$-Lipschitz function over $\R_{\geq 0}$. If $P_X$ is not a Dirac mass, then $F$ is strictly convex.
+\end{proposition}
+Proposition~\ref{prop:i_mmse} is proved in Appendix~\ref{sec:proof_i_mmse}.
+Proposition~\ref{prop:i_mmse} reduces the computation of the MMSE to the computation of the free energy. This will be particularly useful because the free energy $F$ is much easier to handle than the MMSE.
+
+We end this section with the simplest model of the form~\eqref{eq:inference}, namely the additive Gaussian scalar channel:
+\begin{equation}\label{eq:additive_scalar_channel}
+	Y = \sqrt{\lambda} X + Z \,,
+\end{equation}
+where $Z \sim \cN(0,1)$ and $X$ is sampled from a distribution $P_0$ over $\R$, independently of $Z$. The corresponding free energy and the MMSE are respectively
+	\begin{equation}\label{eq:def_psi_p0}
+		\psi_{P_0}(\lambda)= \E \log \int dP_0(x)e^{\sqrt{\lambda} \,Y x - \lambda x^2/2}
+		\quad \text{and} \quad \MMSE_{P_0}(\lambda) = \E \big[\big(X - \E[X|Y]\big)^2\big] \,.
+	\end{equation}
+The study of this simple inference channel will be very useful in the following, because we will see that the inference problems that we are going to study enjoy asymptotically a ``decoupling principle'' that reduces them to scalar channels like~\eqref{eq:additive_scalar_channel}.
+%The next proposition summarizes the main properties of the free energy $\psi_{P_0}$ of the channel~\eqref{eq:additive_scalar_channel}. 
+
+%\begin{proposition}\label{prop:additive_scalar_channel}
+	%Let $X \sim P_0$ be a real random variable with finite second moment. For $\lambda \geq 0$, let $Y = \sqrt{\lambda} X + Z$, where $Z \sim \cN(0,1)$ is independent from $X_0$.
+	%Then the function
+	%\begin{equation}\label{eq:def_psi_p0}
+		%\psi_{P_0}: \lambda \mapsto \E \log \int dP_0(x)e^{\sqrt{\lambda} \,Y x - \lambda x^2/2}
+	%\end{equation}
+	%is convex, continuously differentiable, non-decreasing and $\frac{1}{2}\E[X^2]$-Lipschitz on $\R_{\geq 0}$. Moreover, $\psi_{P_0}$ is strictly convex, if $P_0$ is not a Dirac measure.
+%\end{proposition}
+%\begin{proof}
+%\end{proof}
+%\\
+
+Let us compute the mutual information and the MMSE for particular choices of prior distributions:
+\begin{example}[Gaussian prior: $P_0 = \cN(0,1)$]\label{ex:gaussian_psi}
+			In that case $\E[X|Y]$ is simply the orthogonal projection of $X$ on $Y$: 
+			$$
+			\E[X|Y] = \frac{\E[XY]}{\E[Y^2]} Y = \frac{\sqrt{\lambda}}{1+\lambda} Y.
+			$$
+			One deduces $\MMSE_{P_0}(\lambda) = \frac{1}{1+\lambda}$.
+			Using~\eqref{eq:i_mmse}, we get $I(X;Y) = \frac{1}{2} \log(1+\lambda)$ and $\psi_{P_0}(\lambda) = \frac{1}{2}\big(\lambda - \log(1+\lambda)\big)$.
+\end{example}
+
+\begin{remark}[Worst-case prior]\label{rem:worst_case}
+	Let $P_0$ be a probability distribution on $\R$ with unit second moment $\E_{P_0}[X^2] = 1$. By considering the estimator $\widehat{x} = \frac{\sqrt{\lambda}}{1+\lambda} Y$, one obtain $\MMSE_{P_0}(\lambda) \leq \frac{1}{1+ \lambda}$. We conclude:
+	$$
+	\sup_{P_0} \MMSE_{P_0}(\lambda) = \frac{1}{1+\lambda} \qquad \text{and} \qquad
+	\inf_{P_0} \psi_{P_0}(\lambda) = \frac{1}{2}(\lambda - \log(1+\lambda)),
+	$$
+	where the supremum and infimum are both over the probability distributions that have unit second moment. The standard normal distribution $P_0 = \cN(0,1)$ achieves both extrema.
+\end{remark}
+
+\begin{example}[Rademacher prior: $P_0 = \frac{1}{2} \delta_{+1} + \frac{1}{2} \delta_{-1}$] We compute $\psi_{P_0}(\lambda) = \E \log \cosh(\sqrt{\lambda} Z + \lambda)- \frac{\lambda}{2}$ and $I(X;Y) = \lambda - \E \log \cosh(\sqrt{\lambda} Z + \lambda)$. The I-MMSE relation gives
+			\begin{align*}
+				\frac{1}{2} \MMSE(\lambda) 
+				&= \frac{\partial}{\partial \lambda} I(X;Y)
+				= 1 - \E \Big[\big(\frac{1}{2\sqrt{\lambda}}Z+1\big) \tanh\big(\sqrt{\lambda}Z + \lambda\big)\Big]
+				\\
+				&= 1 - \E \tanh(\sqrt{\lambda}Z + \lambda) - \frac{1}{2} \E \tanh'(\sqrt{\lambda}Z + \lambda)
+				\\
+				&= \frac{1}{2} - \E \tanh(\sqrt{\lambda}Z + \lambda) + \frac{1}{2} \E \tanh^2(\sqrt{\lambda}Z + \lambda)
+			\end{align*}
+			where we used Gaussian integration by parts. Since by the Nishimori property $\E \langle x X \rangle_{\lambda} = \E \langle x \rangle_{\lambda}^2$, one has $\E \tanh(\sqrt{\lambda}Z + \lambda) = \E \tanh^2(\sqrt{\lambda}Z + \lambda)$ and therefore $\MMSE(\lambda) = 1 - \E \tanh(\sqrt{\lambda}Z + \lambda)$.
+\end{example}
+
+
+\section{A warm-up: the ``needle in a haystack'' problem}\label{sec:rem}
+
+In order to illustrate the results seen in the previous sections, we study now a very simple inference model.
+Let $(e_1,\dots,e_{2^n})$ be the canonical basis of $\R^{2^n}$. Let $\sigma_0 \sim \Unif(\{1,\dots,2^n\})$ and define $\bbf{X} = e_{\sigma_0}$ (i.e.\ $\bbf{X}$ is chosen uniformly over the canonical basis of $\R^{2^n}$).
+Suppose here that we observe:
+$$
+\bbf{Y} = \sqrt{\lambda n} \bbf{X} + \bbf{Z} \,,
+$$
+where $\bbf{Z} = (Z_1, \dots, Z_{2^n}) \iid \cN(0,1)$, independently from $\sigma_0$. The goal here is to estimate $\bbf{X}$ or equivalently to find $\sigma_0$.
+The posterior distribution reads:
+\begin{align*}
+\P(\sigma_0 = \sigma | \bbf{Y}) = 
+\P(\bbf{X} = e_{\sigma} | \bbf{Y}) &= 
+\frac{1}{\cZ_{n}(\lambda)} 2^{-n} \exp \Big( \sqrt{\lambda n} e_{\sigma}^{\sT} \bbf{Y} - \frac{\lambda n}{2} \|e_{\sigma}\|^2 \Big)
+\\
+&=
+\frac{1}{\cZ_{n}(\lambda)} 2^{-n} \exp \Big( \sqrt{\lambda n}Z_{\sigma} + \lambda n \1(\sigma = \sigma_0) - \frac{\lambda n}{2} \Big) ,
+\end{align*}
+where $\cZ_n(\lambda)$ is the partition function
+$$
+\cZ_{n}(\lambda) = \frac{1}{2^n} \sum_{\sigma=1}^{2^n} \exp \Big( \sqrt{\lambda n}Z_{\sigma} + \lambda n \1(\sigma = \sigma_0) - \frac{\lambda n}{2} \Big) \,.
+$$
+We will be interested in computing the free energy $F_n(\lambda) = \frac{1}{n} \E \log \cZ_n(\lambda)$ in order to deduce then the minimal mean squared error using the I-MMSE relation~\eqref{eq:i_mmse} presented in the previous section. 
+
+Although its simplicity, this model is interesting for many reasons. 
+First, it is one of the simplest statistical model for which one observes a phase transition.
+Second it is the ``planted'' analog of the random energy model (REM) introduced in statistical physics by Derrida~\cite{derrida1980random,derrida1981random}, for which the free energy reads $\frac{1}{n} \E \log \sum_{\sigma}\frac{1}{2^n} \exp\big(\sqrt{\lambda n} Z_{\sigma}\big)$. Third, as we will see in Section~\ref{sec:tensor_large_order}, this model correspond to the ``large order limit'' of a rank-one tensor estimation model. 
+
+We start by computing the limiting free energy:
+
+\begin{theorem}
+$$
+\lim_{n\to \infty} F_n(\lambda) = 
+\begin{cases}
+	0 & \text{if} \quad \lambda \leq 2 \log 2 \,, \\
+	\frac{\lambda}{2} - \log(2)& \text{if} \quad \lambda \geq 2 \log 2 \,.
+\end{cases}
+$$
+\end{theorem}
+\begin{proof}
+	Using Jensen's inequality
+	\begin{align*}
+	F_n(\lambda) 
+	&\leq \frac{1}{n} \E \log \E \left[ \cZ_n(\lambda) \middle| \sigma_0, Z_{\sigma_0} \right]
+	= \frac{1}{n} \E \log \left(1 - \frac{1}{2^n} + e^{\sqrt{\lambda n} Z_{\sigma_0} + \frac{\lambda n}{2} - \log(2)n}\right)
+	\\
+	&\leq \frac{1}{n} \E \log \left(1 + e^{\frac{\lambda n}{2} - \log(2)n}\right) + \sqrt{\frac{\lambda}{n}}
+	\ \xrightarrow[n \to \infty]{}  \
+	\begin{cases}
+		0 & \text{if} \quad \lambda \leq 2 \log(2)\,, \\
+		\frac{\lambda}{2} - \log(2) & \text{if} \quad \lambda \geq 2 \log(2) \,.
+	\end{cases}
+	\end{align*}
+	$F_n$ is non-negative since $F_n(0) = 0$ and $F_n$ is non-decreasing. We have therefore $F_n(\lambda) \xrightarrow[n \to \infty]{} 0$ for all $\lambda \in [0,2\log(2)]$.
+	We have also, by only considering the term $\sigma = \sigma_0$:
+	$$
+	F_n(\lambda) \geq \frac{1}{n} \E \log \left(\frac{e^{\sqrt{\lambda n}Z_{\sigma_0} + \frac{\lambda n}{2}}}{2^n}\right) = \frac{\lambda}{2} - \log(2) \,.
+	$$
+	We obtain therefore that $F_n(\lambda ) \xrightarrow[n \to \infty]{} \frac{\lambda}{2} - \log(2)$ for $\lambda \geq 2 \log(2)$.
+\end{proof}
+\\
+
+Using the I-MMSE relation~\eqref{eq:i_mmse}, we deduce the limit of the minimum mean squared error $\MMSE_n(\lambda) =  \min_{\widehat{\theta}} \E \| \bbf{X} - \widehat{\theta}(\bbf{Y}) \|^2$:
+$$
+\MMSE_n(\lambda) = \E \|\bbf{X}\|^2 - 2 F_n'(\lambda) = 1 - 2 F_n'(\lambda) \,.
+$$
+$F_n$ is a convex function of $\lambda$, thus (see Proposition~\ref{prop:deriv_convex}) its derivative converges to the derivative of its limit at each $\lambda$ at which the limit is differentiable, i.e.\ for all $\lambda \in (0,+\infty) \setminus \{2 \log(2) \}$. We obtain therefore that for all $\lambda >0$,
+\begin{itemize}
+	\item if $\lambda < 2 \log(2)$, then $\MMSE_n(\lambda) \xrightarrow[n \to \infty]{} 1$: one can not recover $\bbf{X}$ better than a random guess.
+	\item if $\lambda > 2 \log(2)$, then $\MMSE_n(\lambda) \xrightarrow[n \to \infty]{} 0$: one can recover $\bbf{X}$ perfectly.
+\end{itemize}
+Of course, the result we obtain here is (almost) trivial since the maximum likelihood estimator 
+$$
+\widehat{\sigma}(\bbf{Y}) = \argmax_{1 \leq \sigma \leq 2^n} \, Y_{\sigma}
+$$
+of $\sigma_0$ is easy to analyze. Indeed, $\max_{\sigma} Z_{\sigma} \simeq \sqrt{2 \log(2)n}$ with high probability so that the maximum likelihood estimator recovers perfectly the signal for $\lambda > 2 \log(2)$ with high probability.
+
+\end{document}
