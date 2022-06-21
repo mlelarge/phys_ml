@@ -13,7 +13,7 @@
 \section{Intro}
 Bla
 
-\section{Bayesian inference with Gaussian noise}\label{sec:i_mmse}
+\section{Bayesian inference with Gaussian additive noise}\label{sec:i_mmse}
 
 We start with the following model:
 \begin{equation}\label{eq:inference}
@@ -52,6 +52,10 @@ we deduce
 \end{proof}
 
 Following Definition \ref{def:MMSE}, we see that a natural object to study is the posterior distribution of $\bbf{X}$.
+We have for the joint distribution:
+$$
+dP_{(X,Y)}(\bbf{x},\bbf{y}) \propto dP_X(\bbf{x}) e^{\frac{\| \bbf{y}-\sqrt{\lambda}\bbf{x}\|^2}{2}}d\bbf{y}
+$$
 By Bayes rule, the posterior distribution of $\bbf{X}$ given $\bbf{Y}$ is
 \begin{equation}\label{eq:posterior_0}
 	dP( \bbf{x} \, | \, \bbf{Y}  ) 
@@ -97,11 +101,13 @@ for any measurable function $f$ such that $f(\bbf{X})$ is integrable.
 	Therefore
 	\begin{align*}
 		I(\bbf{X};\bbf{Y}) 
-		&= \E \log\left( \frac{d P_{(X,Y)}}{d P_X \!\otimes \!P_Y}(\bbf{X},\bbf{Y}) \right)
-		= - \E \log \int dP_X(\bbf{x}) \exp \left( \sqrt{\lambda} \bbf{x}^{\sT} \bbf{Y} - \sqrt{\lambda} \bbf{X}^{\sT} \bbf{Y} - \frac{\lambda}{2} \|\bbf{x}\|^2 + \frac{\lambda}{2}\|\bbf{X}\|^2 \right)
+		&= \E \log\left( \frac{d P_{(X,Y)}}{d P_X \!\otimes \!P_Y}(\bbf{X},\bbf{Y}) \right)\\
+		&= - \E \log \int dP_X(\bbf{x}) \exp \left( \sqrt{\lambda} \bbf{x}^{\sT} \bbf{Y} - \sqrt{\lambda} \bbf{X}^{\sT} \bbf{Y} - \frac{\lambda}{2} \|\bbf{x}\|^2 + \frac{\lambda}{2}\|\bbf{X}\|^2 \right)
 		\\
-		&= - F(\lambda) + \frac{\lambda}{2} \E \| \bbf{X} \|^2 \,.
+                &= -F(\lambda) +\sqrt{\lambda}\E \bbf{X}^T\bbf{Y} - \frac{\lambda}{2} \E \|\bbf{X} \|^2\\
+		&= - F(\lambda) + \frac{\lambda}{2} \E \| \bbf{X} \|^2 \,,
 	\end{align*}
+since $\sqrt{\lambda}\bbf{X}^T\bbf{Y} = \lambda \|\bbf{X}\|^2 + \sqrt{\lambda}\bbf{X}^T\bbf{Z}$.
 \end{proof}
 
 We state now two basic properties of the $\MMSE$. A more detailed analysis can be found in~\cite{guo2011estimation,wu2012functional}.
@@ -114,10 +120,42 @@ We state now two basic properties of the $\MMSE$. A more detailed analysis can b
 		\item $\MMSE(\lambda) \xrightarrow[\lambda \to +\infty]{} 0$.
 	\end{itemize}
 \end{proposition}
+\begin{proof}
+Let $0 < \lambda_2 < \lambda_1$. Define $\Delta_1 = \lambda_1^{-1}$, $\Delta_2 = \lambda_2^{-1}$ and
+	$$
+	\begin{cases}
+		\bbf{Y}_1 = \bbf{X} + \sqrt{\Delta_1} \bbf{Z}_1 \\
+		\bbf{Y}_2 = \bbf{X} + \sqrt{\Delta_1} \bbf{Z}_1  + \sqrt{\Delta_2 - \Delta_1} \bbf{Z}_2 \,,
+	\end{cases}
+	$$
+	where $\bbf{X} \sim P_X$ is independent from $\bbf{Z}_1,\bbf{Z}_2 \iid \cN(0,\Id_n)$. Now, by independence between $(\bbf{X},\bbf{Y}_1)$ and $\bbf{Z}_2$ we have
+	\begin{align*}
+		\MMSE(\lambda_1) 
+		&= \E \left\| \bbf{X} - \E [\bbf{X} | \bbf{Y}_1] \right\|^2
+		= \E \left\| \bbf{X} - \E [\bbf{X} | \bbf{Y}_1, \bbf{Z}_2] \right\|^2
+		= \E \left\| \bbf{X} - \E [\bbf{X} | \bbf{Y}_1, \bbf{Y}_2] \right\|^2
+		\\
+		&\leq \E \left\| \bbf{X} - \E [\bbf{X} | \bbf{Y}_2] \right\|^2
+		= \MMSE(\lambda_2) \,.
+	\end{align*}
+	Next, notice that
+	\begin{equation}\label{eq:upper_bound_mmse}
+		\MMSE(\lambda_1)
+		= \E \left\| \bbf{X} - \E [\bbf{X} | \bbf{Y}_1] \right\|^2
+		\leq \E \left\| \bbf{X} - \E [\bbf{X}] \right\|^2 = \MMSE(0)\,.
+	\end{equation}
+	This shows that the $\MMSE$ is non-increasing on $\R_{\geq 0}$. 
+	The first point is obvious while the second follows from:
+	$$
+	0 \leq \MMSE(\lambda)
+	= \E \| \bbf{X} - \E[\bbf{X}| \bbf{Y}]\|^2
+	\leq \E \| \bbf{X} - \frac{1}{\sqrt{\lambda}} \bbf{Y}\|^2 = \frac{n}{\lambda} \xrightarrow[\lambda \to +\infty]{} 0 \,.
+	$$
+\end{proof}
 \begin{proposition}\label{prop:mmse_cont}
 	$\lambda \mapsto \MMSE(\lambda)$ is continuous over $\R_{\geq 0}$.
 \end{proposition}
-The proofs of Proposition~\ref{prop:mmse_dec} and~\ref{prop:mmse_cont} can respectively be found in Appendix~\ref{sec:proof_mmse_dec} and~\ref{sec:proof_mmse_cont}.
+The proof of Proposition~\ref{prop:mmse_cont} can be found in Appendix~\ref{sec:proof_mmse_cont}.
 \\
 
 We present now the very useful ``I-MMSE'' relation from~\cite{guo2005mutual}. This relation was previously known (under a different formulation) as ``de Brujin identity'' see \cite[Equation 2.12]{stam1959some}.
@@ -132,6 +170,10 @@ We present now the very useful ``I-MMSE'' relation from~\cite{guo2005mutual}. Th
 	\end{equation}
 	$F$ thus is a convex, differentiable, non-decreasing, and $\frac{1}{2}\E\|\bbf{X}\|^2$-Lipschitz function over $\R_{\geq 0}$. If $P_X$ is not a Dirac mass, then $F$ is strictly convex.
 \end{proposition}
+
+TBC...
+
+\newpage
 Proposition~\ref{prop:i_mmse} is proved in Appendix~\ref{sec:proof_i_mmse}.
 Proposition~\ref{prop:i_mmse} reduces the computation of the MMSE to the computation of the free energy. This will be particularly useful because the free energy $F$ is much easier to handle than the MMSE.
 
@@ -482,5 +524,94 @@ $$
 \widehat{\sigma}(\bbf{Y}) = \argmax_{1 \leq \sigma \leq 2^n} \, Y_{\sigma}
 $$
 of $\sigma_0$ is easy to analyze. Indeed, $\max_{\sigma} Z_{\sigma} \simeq \sqrt{2 \log(2)n}$ with high probability so that the maximum likelihood estimator recovers perfectly the signal for $\lambda > 2 \log(2)$ with high probability.
+
+
+\section{Appendix}
+\subsection{Proof of Proposition~\ref{prop:mmse_cont}} \label{sec:proof_mmse_cont}
+	We start by proving that $\MMSE$ is continuous at $\lambda = 0$.
+	Let $\lambda\geq0$ and consider $\bbf{Y},\bbf{X},\bbf{Z}$ as given by~\eqref{eq:inference}.
+	%We have obviously $\MMSE(\lambda) \leq \E \big\| \bbf{X} - \E[\bbf{X}] \big\|^2$.
+	%Let $c >0$ such that $\P(\|\bbf{X}\| \leq c)>0$ and define the random variable $B_c = \1(\|\bbf{X}\| \leq c)$.
+	%\begin{equation}\label{eq:lower_bound_mmse}
+		%\MMSE(\lambda) 
+		%%&= \E \big\| \bbf{X} - \E [\bbf{X} | \bbf{Y}] \big\|^2
+		%\geq \E \big\| \bbf{X} - \E [\bbf{X} | \bbf{Y},B_c] \big\|^2
+		%\geq \E \left[  B_c \big\| \bbf{X} - \E [\bbf{X} | \bbf{Y},B_c] \big\|^2\right]\,.
+		%%\\
+		%%&= \E \left[ \big\| \bbf{X} B_c - \E [\bbf{X} B_c | \bbf{Y},B_c] \big\|^2\right]
+	%\end{equation}
+	By dominated convergence one has almost surely that 
+	$$
+	\E[\bbf{X} | \bbf{Y}]
+	= 
+	\frac{\int dP_X(\bbf{x}) \bbf{x} e^{-\frac{1}{2}\| \sqrt{\lambda} \bbf{x} - \bbf{Y}\|^2}}{\int dP_X(\bbf{x}) e^{-\frac{1}{2}\| \sqrt{\lambda} \bbf{x} - \bbf{Y}\|^2}}
+	\xrightarrow[\lambda \to 0]{} \E[\bbf{X}] \,.
+	$$
+	Then by Fatou's Lemma we get
+	$$
+	\liminf_{\lambda \to 0} \MMSE(\lambda) \geq \E \Big[\liminf_{\lambda \to 0}
+		\big\| \bbf{X} - \E[\bbf{X}| \bbf{Y}] \big\|^2
+	\Big] = \E \big\| \bbf{X} - \E[\bbf{X}] \big\|^2 \,.
+	$$
+	%$$
+	%B_c \E [\bbf{X} | \bbf{Y},B_c]
+	%=
+	%B_c
+	%\frac{\int_{\|\bbf{x}\| \leq c} dP_X(\bbf{x}) \bbf{x} e^{H_{\lambda,\bbf{Y}}(\bbf{x})}}{\int_{\|\bbf{x}\| \leq c} dP_X(\bbf{x}) e^{H_{\lambda,\bbf{Y}}(\bbf{x})}}
+	%\xrightarrow[\lambda \to 0]{} B_c \P(\|\bbf{X}\| \leq c)^{-1}\E [\1(\|\bbf{X}\| \leq c)\bbf{X} ] \,,
+	%$$
+	%and therefore another application of the dominated convergence theorem gives:
+	%$$
+	%\E \left[  B_c \big\| \bbf{X} - \E [\bbf{X} | \bbf{Y},B_c] \big\|^2\right]
+	%\xrightarrow[\lambda \to 0]{}
+	%\E \left[ \1(\|\bbf{X}\|\leq c) \Big\| \bbf{X} - \P(\|\bbf{X}\| \leq c)^{-1} \E [\1(\|\bbf{X}\|\leq c)\bbf{X}] \Big\|^2\right] \,.
+	%$$
+	%Again, by the dominated convergence theorem, the right-hand side converges to $\E \| \bbf{X} -\E[\bbf{X}]\|^2$ as $c \to +\infty$. Going back to~\eqref{eq:lower_bound_mmse}, we obtain that
+	%$$
+	%\liminf_{\lambda \to 0} \MMSE(\lambda) \geq \E \| \bbf{X} -\E[\bbf{X}]\|^2\,,
+	%$$
+	Combining this with the bound $\MMSE(\lambda) \leq \E \| \bbf{X} - \E[\bbf{X}]\|^2$ gives $\MMSE(\lambda) \xrightarrow[\lambda \to 0]{} \E \| \bbf{X} -\E[\bbf{X}]\|^2$. This proves that the $\MMSE$ is continuous at $\lambda=0$.
+	\\
+
+	Let us now prove that the $\MMSE$ is continuous on $\R_{\geq 0}^*$. We need here a technical lemma:
+	\begin{lemma}\label{lem:ui1}
+		For all $\lambda > 0$, $p \geq 1$
+		$$
+		\E \| \bbf{X} - \langle \bbf{x} \rangle_{\lambda} \|^{2p} \leq \frac{2^p (2p !)}{\lambda ^{p} p!} n^{p+1} \,.
+		$$
+	\end{lemma}
+	\begin{proof}
+		We reproduce here the proof from~\cite{guo2011estimation}, Proposition~5. We start with the equality
+		$$
+		\sqrt{\lambda} \left(\bbf{X} - \langle \bbf{x} \rangle_{\lambda}\right)
+		=
+		\sqrt{\lambda} \bbf{X} - \E [ \sqrt{\lambda} \bbf{X} | \bbf{Y} ]
+		=
+		\bbf{Y} - \bbf{Z} - \E [ \bbf{Y} - \bbf{Z} | \bbf{Y} ]
+		=
+		\E [ \bbf{Z} | \bbf{Y} ] -\bbf{Z} \,.
+		$$
+		We have therefore
+		\begin{align*}
+			\E \| \bbf{X} - \langle \bbf{x} \rangle_{\lambda} \|^{2p} 
+			&= \frac{1}{\lambda ^{p}} 
+			\E \big\| \E [ \bbf{Z} | \bbf{Y} ] -\bbf{Z}\big\|^{2p}
+			\leq 
+			\frac{2^{2p-1}}{\lambda ^{p}} 
+			\E \big[  \|\E [ \bbf{Z} | \bbf{Y} ]\|^{2p} +\|\bbf{Z}\|^{2p} \big]
+			\leq
+			\frac{2^{2p}}{\lambda ^{p}} 
+			\E \|\bbf{Z}\|^{2p} \,.
+		\end{align*}
+		It remains to bound
+		$$
+		\E \|\bbf{Z}\|^{2p}
+		\leq n^p \E \left[\sum_{i=1}^n Z_i^{2p} \right]
+		= n^{p+1} \frac{(2p)!}{2^p p!} \,.
+		$$
+	\end{proof}
+	\\
+
+	Let $\lambda_0 > 0$. The family of random variables $\big(\| \bbf{X} - \langle \bbf{x}\rangle_{\lambda}\|^2\big)_{\lambda \geq \lambda_0}$ is bounded in $L^2$ by Lemma~\ref{lem:ui1} and is therefore uniformly integrable. The function $\lambda \mapsto \| \bbf{X} - \langle \bbf{x}\rangle_{\lambda}\|^2$ is continuous on $[\lambda_0,+\infty)$, the uniform integrability ensures then that $\MMSE: \lambda \mapsto  \E\| \bbf{X} - \langle \bbf{x}\rangle_{\lambda}\|^2$ is continuous over $[\lambda_0,+\infty)$. This is valid for all $\lambda_0 >0$: we conclude that $\MMSE$ is continuous over $(0,+\infty)$.
 
 \end{document}
