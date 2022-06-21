@@ -13,7 +13,186 @@
 \section{Intro}
 Bla
 
-\section{Bayes-optimal inference}\label{chap:gaussian}
+\section{Bayesian inference with Gaussian noise}\label{sec:i_mmse}
+
+We start with the following model:
+\begin{equation}\label{eq:inference}
+	\bbf{Y} = \sqrt{\lambda} \, \bbf{X} + \bbf{Z} \,,
+\end{equation}
+where the signal $\bbf{X}$ is sampled according to some probability distribution $P_X$ over $\R^n$, and where the noise $\bbf{Z} =(Z_1, \dots, Z_n) \iid \cN(0,1)$ is independent from $\bbf{X}$. 
+The parameter $\lambda \geq 0$ plays the role of a signal-to-noise ratio.
+We assume that $P_X$ admits a finite second moment: $\E \|\bbf{X}\|^2 < \infty$. No other assumption is made on $P_X$. In particular, the fact that the noise is i.i.d. in the dimension $n$ will be crucial in the computation below but no such assumption is made on the signal which is allowed to have any complicated structure component-wise.
+
+Given the observation channel~\eqref{eq:inference}, the goal of the statistician is to estimate $\bbf{X}$ given the observations $\bbf{Y}$. We assume to be in the ``Bayes-optimal'' setting, where the statistician knows all the parameters of the inference model, that is the prior distribution $P_X$ and the signal-to-noise ratio $\lambda$. 
+As will be clear below, the Mean Squared Error (MSE) is the natural measure of performance when dealing with Gaussian noise. In this section, we measure the performance of an estimator $\widehat{\theta}$ (i.e.\ a measurable function of the observations $\bbf{Y}$) by its Mean Squared Error $\MSE(\widehat{\theta}) = \E \| \bbf{X} - \widehat{\theta}(\bbf{Y}) \|^2$.
+%One of our main quantity of interest will be 
+\begin{definition}\label{def:MMSE}
+For a signal $\bbf{X}$ and observations $\bbf{Y}$, the Minimum Mean Squared Error is defined by
+$$
+\MMSE(\lambda) \defeq \min_{\widehat{\theta}} \MSE(\widehat{\theta})= \E \left[ \left\| \bbf{X} - \E[\bbf{X}|\bbf{Y}] \right\|^2 \right],
+$$
+where the minimum is taken over all measurable function $\widehat{\theta}$ of the observations $\bbf{Y}$. 
+The optimal estimator (in term of Mean Squared Error) is the posterior mean of the signal $\bbf{X}$ given $\bbf{Y}$.
+\end{definition}
+\begin{proof}
+Using $\E[\bbf{X}^T\widehat{\theta}(\bbf{Y})|\bbf{Y}]  = \E[\bbf{X}|\bbf{Y}]^T \widehat{\theta}(\bbf{Y})$, we have
+\begin{align*}
+\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \bbf{X}\right\|^2\right] - 2 \E \left[ \E[\bbf{X}|\bbf{Y}]^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]
+\end{align*}
+and 
+\begin{align*}
+\E \left[ \left\| \E[\bbf{X}|\bbf{Y}] -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \E[\bbf{X}|\bbf{Y}]\right\|^2\right] - 2 \E \left[ \E[\bbf{X}|\bbf{Y}]^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]\geq 0,
+\end{align*}
+we deduce
+\begin{align*}
+\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & \geq \E\left[ \left\| \bbf{X}\right\|^2\right] - \E\left[ \left\| \E[\bbf{X}|\bbf{Y}]\right\|^2\right]\\
+& = \E\left[ \left\| \bbf{X}\right\|^2\right] -2\E \left[ \E[\bbf{X}|\bbf{Y}]^T\E[\bbf{X}|\bbf{Y}] \right] + \E\left[ \left\| \E[\bbf{X}|\bbf{Y}]\right\|^2\right]\\
+& = \E \left[ \left\| \bbf{X} - \E[\bbf{X}|\bbf{Y}] \right\|^2 \right]
+\end{align*}
+\end{proof}
+
+Following Definition \ref{def:MMSE}, we see that a natural object to study is the posterior distribution of $\bbf{X}$.
+By Bayes rule, the posterior distribution of $\bbf{X}$ given $\bbf{Y}$ is
+\begin{equation}\label{eq:posterior_0}
+	dP( \bbf{x} \, | \, \bbf{Y}  ) 
+	= \frac{1}{\cZ(\lambda,\bbf{Y})} e^{H_{\lambda,\bbf{Y}}(\bbf{x})} dP_X(\bbf{x}) \,,
+\end{equation}
+where 
+$$
+H_{\lambda,\bbf{Y}}(\bbf{x})=
+\sqrt{\lambda}\, \bbf{x}^{\sT} \bbf{Y} - \frac{\lambda}{2} \| \bbf{x} \|^2
+=
+\sqrt{\lambda} \, \bbf{x}^{\sT} \bbf{Z} + \lambda \, \bbf{x}^{\sT} \bbf{X} - \frac{\lambda}{2} \| \bbf{x} \|^2 \,.
+$$
+\begin{definition}
+	$H_{\lambda,\bbf{Y}}$ is called the Hamiltonian\protect\footnotemark and the normalizing constant
+	$$
+	\cZ(\lambda,\bbf{Y}) = \int dP_X(\bbf{x}) e^{H_{\lambda,\bbf{Y}}(\bbf{x})}
+	$$
+	is called the partition function. 
+\end{definition}
+\footnotetext{According to the physics convention, this should be minus the Hamiltonian, since a physical system tries to minimize its energy. However, we chose here to remove it for simplicity.}
+Expectations with respect the posterior distribution~\eqref{eq:posterior_0} will be denoted by the Gibbs brackets $\langle \cdot \rangle_{\lambda}$:
+$$
+\big\langle f(\bbf{x}) \big\rangle_{\lambda}
+= \E \big[f(\bbf{X})|\bbf{Y} \big]
+= \frac{1}{\cZ(\lambda,\bbf{Y})} \int dP_X(\bbf{x}) f(\bbf{x}) e^{H_{\lambda,\bbf{Y}}(\bbf{x})} \,,
+$$
+for any measurable function $f$ such that $f(\bbf{X})$ is integrable.
+
+\begin{definition}
+	$F(\lambda) = \E \log \cZ(\lambda,\bbf{Y})$ is called the free energy\footnotemark. It is related to the mutual information between $\bbf{X}$ and $\bbf{Y}$ by
+	\begin{equation}\label{eq:f_i}
+		F(\lambda) = \frac{\lambda}{2} \E \| \bbf{X} \|^2 - I(\bbf{X};\bbf{Y})\,.
+	\end{equation}
+\end{definition}
+\footnotetext{This is in fact minus the free energy, but we chose to remove the minus sign for simplicity.}
+\begin{proof}
+	The mutual information $I(\bbf{X};\bbf{Y})$ is defined as the Kullback-Leibler divergence between $P_{(X,Y)}$, the joint distribution of $(\bbf{X},\bbf{Y})$ and $P_X \! \otimes \! P_Y$ the product of the marginal distributions of $\bbf{X}$ and $\bbf{Y}$. $P_{(X,Y)}$ is absolutely continuous with respect to $P_X \otimes P_Y$ with Radon-Nikodym derivative:
+	$$
+	\frac{d P_{(X,Y)}}{d P_X \! \otimes \! P_Y}(\bbf{X},\bbf{Y})
+	=
+	\frac{\exp\left(-\frac{1}{2}\| \bbf{Y} - \sqrt{\lambda} \bbf{X} \|^2\right)}{\int \exp\left(-\frac{1}{2}\| \bbf{Y} - \sqrt{\lambda} \bbf{x} \|^2\right) dP_X(\bbf{x})} \,.
+	$$
+	Therefore
+	\begin{align*}
+		I(\bbf{X};\bbf{Y}) 
+		&= \E \log\left( \frac{d P_{(X,Y)}}{d P_X \!\otimes \!P_Y}(\bbf{X},\bbf{Y}) \right)
+		= - \E \log \int dP_X(\bbf{x}) \exp \left( \sqrt{\lambda} \bbf{x}^{\sT} \bbf{Y} - \sqrt{\lambda} \bbf{X}^{\sT} \bbf{Y} - \frac{\lambda}{2} \|\bbf{x}\|^2 + \frac{\lambda}{2}\|\bbf{X}\|^2 \right)
+		\\
+		&= - F(\lambda) + \frac{\lambda}{2} \E \| \bbf{X} \|^2 \,.
+	\end{align*}
+\end{proof}
+
+We state now two basic properties of the $\MMSE$. A more detailed analysis can be found in~\cite{guo2011estimation,wu2012functional}.
+\begin{proposition}\label{prop:mmse_dec}
+	$\lambda \mapsto \MMSE(\lambda)$ is non-increasing over $\R_{\geq 0}$. 
+	%If $P_X$ is not a Dirac mass, then $\MMSE$ is strictly decreasing on $\R_{\geq 0}$.
+	Moreover
+	\begin{itemize}
+		\item $\MMSE(0) = \E\|\bbf{X} - \E[\bbf{X}]\|^2$,
+		\item $\MMSE(\lambda) \xrightarrow[\lambda \to +\infty]{} 0$.
+	\end{itemize}
+\end{proposition}
+\begin{proposition}\label{prop:mmse_cont}
+	$\lambda \mapsto \MMSE(\lambda)$ is continuous over $\R_{\geq 0}$.
+\end{proposition}
+The proofs of Proposition~\ref{prop:mmse_dec} and~\ref{prop:mmse_cont} can respectively be found in Appendix~\ref{sec:proof_mmse_dec} and~\ref{sec:proof_mmse_cont}.
+\\
+
+We present now the very useful ``I-MMSE'' relation from~\cite{guo2005mutual}. This relation was previously known (under a different formulation) as ``de Brujin identity'' see \cite[Equation 2.12]{stam1959some}.
+\begin{proposition}\label{prop:i_mmse}
+	For all $\lambda \geq 0$,
+	\begin{equation}\label{eq:i_mmse}
+		\frac{\partial}{\partial \lambda} I(\bbf{X};\bbf{Y}) = \frac{1}{2} \MMSE(\lambda)
+		\qquad \text{and} \qquad
+		F'(\lambda) = \frac{1}{2} \E \langle \bbf{x}^{\sT} \bbf{X} \rangle_{\lambda} 
+		= \frac{1}{2} \big(\E \| \bbf{X}\|^2 - \MMSE(\lambda) \big)
+		\,.
+	\end{equation}
+	$F$ thus is a convex, differentiable, non-decreasing, and $\frac{1}{2}\E\|\bbf{X}\|^2$-Lipschitz function over $\R_{\geq 0}$. If $P_X$ is not a Dirac mass, then $F$ is strictly convex.
+\end{proposition}
+Proposition~\ref{prop:i_mmse} is proved in Appendix~\ref{sec:proof_i_mmse}.
+Proposition~\ref{prop:i_mmse} reduces the computation of the MMSE to the computation of the free energy. This will be particularly useful because the free energy $F$ is much easier to handle than the MMSE.
+
+We end this section with the simplest model of the form~\eqref{eq:inference}, namely the additive Gaussian scalar channel:
+\begin{equation}\label{eq:additive_scalar_channel}
+	Y = \sqrt{\lambda} X + Z \,,
+\end{equation}
+where $Z \sim \cN(0,1)$ and $X$ is sampled from a distribution $P_0$ over $\R$, independently of $Z$. The corresponding free energy and the MMSE are respectively
+	\begin{equation}\label{eq:def_psi_p0}
+		\psi_{P_0}(\lambda)= \E \log \int dP_0(x)e^{\sqrt{\lambda} \,Y x - \lambda x^2/2}
+		\quad \text{and} \quad \MMSE_{P_0}(\lambda) = \E \big[\big(X - \E[X|Y]\big)^2\big] \,.
+	\end{equation}
+The study of this simple inference channel will be very useful in the following, because we will see that the inference problems that we are going to study enjoy asymptotically a ``decoupling principle'' that reduces them to scalar channels like~\eqref{eq:additive_scalar_channel}.
+%The next proposition summarizes the main properties of the free energy $\psi_{P_0}$ of the channel~\eqref{eq:additive_scalar_channel}. 
+
+%\begin{proposition}\label{prop:additive_scalar_channel}
+	%Let $X \sim P_0$ be a real random variable with finite second moment. For $\lambda \geq 0$, let $Y = \sqrt{\lambda} X + Z$, where $Z \sim \cN(0,1)$ is independent from $X_0$.
+	%Then the function
+	%\begin{equation}\label{eq:def_psi_p0}
+		%\psi_{P_0}: \lambda \mapsto \E \log \int dP_0(x)e^{\sqrt{\lambda} \,Y x - \lambda x^2/2}
+	%\end{equation}
+	%is convex, continuously differentiable, non-decreasing and $\frac{1}{2}\E[X^2]$-Lipschitz on $\R_{\geq 0}$. Moreover, $\psi_{P_0}$ is strictly convex, if $P_0$ is not a Dirac measure.
+%\end{proposition}
+%\begin{proof}
+%\end{proof}
+%\\
+
+Let us compute the mutual information and the MMSE for particular choices of prior distributions:
+\begin{example}[Gaussian prior: $P_0 = \cN(0,1)$]\label{ex:gaussian_psi}
+			In that case $\E[X|Y]$ is simply the orthogonal projection of $X$ on $Y$: 
+			$$
+			\E[X|Y] = \frac{\E[XY]}{\E[Y^2]} Y = \frac{\sqrt{\lambda}}{1+\lambda} Y.
+			$$
+			One deduces $\MMSE_{P_0}(\lambda) = \frac{1}{1+\lambda}$.
+			Using~\eqref{eq:i_mmse}, we get $I(X;Y) = \frac{1}{2} \log(1+\lambda)$ and $\psi_{P_0}(\lambda) = \frac{1}{2}\big(\lambda - \log(1+\lambda)\big)$.
+\end{example}
+
+\begin{remark}[Worst-case prior]\label{rem:worst_case}
+	Let $P_0$ be a probability distribution on $\R$ with unit second moment $\E_{P_0}[X^2] = 1$. By considering the estimator $\widehat{x} = \frac{\sqrt{\lambda}}{1+\lambda} Y$, one obtain $\MMSE_{P_0}(\lambda) \leq \frac{1}{1+ \lambda}$. We conclude:
+	$$
+	\sup_{P_0} \MMSE_{P_0}(\lambda) = \frac{1}{1+\lambda} \qquad \text{and} \qquad
+	\inf_{P_0} \psi_{P_0}(\lambda) = \frac{1}{2}(\lambda - \log(1+\lambda)),
+	$$
+	where the supremum and infimum are both over the probability distributions that have unit second moment. The standard normal distribution $P_0 = \cN(0,1)$ achieves both extrema.
+\end{remark}
+
+\begin{example}[Rademacher prior: $P_0 = \frac{1}{2} \delta_{+1} + \frac{1}{2} \delta_{-1}$] We compute $\psi_{P_0}(\lambda) = \E \log \cosh(\sqrt{\lambda} Z + \lambda)- \frac{\lambda}{2}$ and $I(X;Y) = \lambda - \E \log \cosh(\sqrt{\lambda} Z + \lambda)$. The I-MMSE relation gives
+			\begin{align*}
+				\frac{1}{2} \MMSE(\lambda) 
+				&= \frac{\partial}{\partial \lambda} I(X;Y)
+				= 1 - \E \Big[\big(\frac{1}{2\sqrt{\lambda}}Z+1\big) \tanh\big(\sqrt{\lambda}Z + \lambda\big)\Big]
+				\\
+				&= 1 - \E \tanh(\sqrt{\lambda}Z + \lambda) - \frac{1}{2} \E \tanh'(\sqrt{\lambda}Z + \lambda)
+				\\
+				&= \frac{1}{2} - \E \tanh(\sqrt{\lambda}Z + \lambda) + \frac{1}{2} \E \tanh^2(\sqrt{\lambda}Z + \lambda)
+			\end{align*}
+			where we used Gaussian integration by parts. Since by the Nishimori property $\E \langle x X \rangle_{\lambda} = \E \langle x \rangle_{\lambda}^2$, one has $\E \tanh(\sqrt{\lambda}Z + \lambda) = \E \tanh^2(\sqrt{\lambda}Z + \lambda)$ and therefore $\MMSE(\lambda) = 1 - \E \tanh(\sqrt{\lambda}Z + \lambda)$.
+\end{example}
+
+
+\section{Bayes-optimal inference}
 We introduce in this chapter some general properties of Bayes-optimal inference, that will be used repeatedly in the sequel.
 Let us first define what we mean by \textit{Bayes-optimal inference}.
 
@@ -225,160 +404,6 @@ For simplicity we assumed in this section that $\|\bbf{X}\|^2 = 1$ almost surely
 
 
 
-\section{Bayesian inference with Gaussian noise}\label{sec:i_mmse}
-
-We will now focus on the following model:
-\begin{equation}\label{eq:inference}
-	\bbf{Y} = \sqrt{\lambda} \, \bbf{X} + \bbf{Z} \,,
-\end{equation}
-where the signal $\bbf{X}$ is sampled according to some probability distribution $P_X$ over $\R^n$, and where the noise $\bbf{Z} =(Z_1, \dots, Z_n) \iid \cN(0,1)$ is independent from $\bbf{X}$. In Chapters~\ref{sec:xx} and~\ref{sec:uv}, $\bbf{X}$ will typically be a low-rank matrix. The parameter $\lambda \geq 0$ plays the role of a signal-to-noise ratio.
-We assume that $P_X$ admits a finite second moment: $\E \|\bbf{X}\|^2 < \infty$.
-
-Given the observation channel~\eqref{eq:inference}, the goal of the statistician is to estimate $\bbf{X}$ given the observations $\bbf{Y}$. Again, we assume to be in the ``Bayes-optimal'' setting, where the statistician knows all the parameters of the inference model, that is the prior distribution $P_X$ and the signal-to-noise ratio $\lambda$. We measure the performance of an estimator $\widehat{\theta}$ (i.e.\ a measurable function of the observations $\bbf{Y}$) by its Mean Squared Error $\MSE(\widehat{\theta}) = \E \| \bbf{X} - \widehat{\theta}(\bbf{Y}) \|^2$.
-One of our main quantity of interest will be the Minimum Mean Squared Error
-$$
-\MMSE(\lambda) \defeq \min_{\widehat{\theta}} \MSE(\widehat{\theta}) = \E \left[ \left\| \bbf{X} - \E[\bbf{X}|\bbf{Y}] \right\|^2 \right],
-$$
-where the minimum is taken over all measurable function $\widehat{\theta}$ of the observations $\bbf{Y}$.
-Since the optimal estimator (in term of Mean Squared Error) is the posterior mean of $\bbf{X}$ given $\bbf{Y}$, a natural object to study is the posterior distribution of $\bbf{X}$.
-By Bayes rule, the posterior distribution of $\bbf{X}$ given $\bbf{Y}$ is
-\begin{equation}\label{eq:posterior_0}
-	dP( \bbf{x} \, | \, \bbf{Y}  ) 
-	= \frac{1}{\cZ(\lambda,\bbf{Y})} e^{H_{\lambda,\bbf{Y}}(\bbf{x})} dP_X(\bbf{x}) \,,
-\end{equation}
-where 
-$$
-H_{\lambda,\bbf{Y}}(\bbf{x})=
-\sqrt{\lambda}\, \bbf{x}^{\sT} \bbf{Y} - \frac{\lambda}{2} \| \bbf{x} \|^2
-=
-\sqrt{\lambda} \, \bbf{x}^{\sT} \bbf{Z} + \lambda \, \bbf{x}^{\sT} \bbf{X} - \frac{\lambda}{2} \| \bbf{x} \|^2 \,.
-$$
-\begin{definition}
-	$H_{\lambda,\bbf{Y}}$ is called the Hamiltonian\protect\footnotemark and the normalizing constant
-	$$
-	\cZ(\lambda,\bbf{Y}) = \int dP_X(\bbf{x}) e^{H_{\lambda,\bbf{Y}}(\bbf{x})}
-	$$
-	is called the partition function. 
-\end{definition}
-\footnotetext{According to the physics convention, this should be minus the Hamiltonian, since a physical system tries to minimize its energy. However, we chose here to remove it for simplicity.}
-Expectations with respect the posterior distribution~\eqref{eq:posterior_0} will be denoted by the Gibbs brackets $\langle \cdot \rangle_{\lambda}$:
-$$
-\big\langle f(\bbf{x}) \big\rangle_{\lambda}
-= \E \big[f(\bbf{X})|\bbf{Y} \big]
-= \frac{1}{\cZ(\lambda,\bbf{Y})} \int dP_X(\bbf{x}) f(\bbf{x}) e^{H_{\lambda,\bbf{Y}}(\bbf{x})} \,,
-$$
-for any measurable function $f$ such that $f(\bbf{X})$ is integrable.
-
-\begin{definition}
-	$F(\lambda) = \E \log \cZ(\lambda,\bbf{Y})$ is called the free energy\footnotemark. It is related to the mutual information between $\bbf{X}$ and $\bbf{Y}$ by
-	\begin{equation}\label{eq:f_i}
-		F(\lambda) = \frac{\lambda}{2} \E \| \bbf{X} \|^2 - I(\bbf{X};\bbf{Y})\,.
-	\end{equation}
-\end{definition}
-\footnotetext{This is in fact minus the free energy, but we chose to remove the minus sign for simplicity.}
-\begin{proof}
-	The mutual information $I(\bbf{X};\bbf{Y})$ is defined as the Kullback-Leibler divergence between $P_{(X,Y)}$, the joint distribution of $(\bbf{X},\bbf{Y})$ and $P_X \! \otimes \! P_Y$ the product of the marginal distributions of $\bbf{X}$ and $\bbf{Y}$. $P_{(X,Y)}$ is absolutely continuous with respect to $P_X \otimes P_Y$ with Radon-Nikodym derivative:
-	$$
-	\frac{d P_{(X,Y)}}{d P_X \! \otimes \! P_Y}(\bbf{X},\bbf{Y})
-	=
-	\frac{\exp\left(-\frac{1}{2}\| \bbf{Y} - \sqrt{\lambda} \bbf{X} \|^2\right)}{\int \exp\left(-\frac{1}{2}\| \bbf{Y} - \sqrt{\lambda} \bbf{x} \|^2\right) dP_X(\bbf{x})} \,.
-	$$
-	Therefore
-	\begin{align*}
-		I(\bbf{X};\bbf{Y}) 
-		&= \E \log\left( \frac{d P_{(X,Y)}}{d P_X \!\otimes \!P_Y}(\bbf{X},\bbf{Y}) \right)
-		= - \E \log \int dP_X(\bbf{x}) \exp \left( \sqrt{\lambda} \bbf{x}^{\sT} \bbf{Y} - \sqrt{\lambda} \bbf{X}^{\sT} \bbf{Y} - \frac{\lambda}{2} \|\bbf{x}\|^2 + \frac{\lambda}{2}\|\bbf{X}\|^2 \right)
-		\\
-		&= - F(\lambda) + \frac{\lambda}{2} \E \| \bbf{X} \|^2 \,.
-	\end{align*}
-\end{proof}
-
-We state now two basic properties of the $\MMSE$. A more detailed analysis can be found in~\cite{guo2011estimation,wu2012functional}.
-\begin{proposition}\label{prop:mmse_dec}
-	$\lambda \mapsto \MMSE(\lambda)$ is non-increasing over $\R_{\geq 0}$. 
-	%If $P_X$ is not a Dirac mass, then $\MMSE$ is strictly decreasing on $\R_{\geq 0}$.
-	Moreover
-	\begin{itemize}
-		\item $\MMSE(0) = \E\|\bbf{X} - \E[\bbf{X}]\|^2$,
-		\item $\MMSE(\lambda) \xrightarrow[\lambda \to +\infty]{} 0$.
-	\end{itemize}
-\end{proposition}
-\begin{proposition}\label{prop:mmse_cont}
-	$\lambda \mapsto \MMSE(\lambda)$ is continuous over $\R_{\geq 0}$.
-\end{proposition}
-The proofs of Proposition~\ref{prop:mmse_dec} and~\ref{prop:mmse_cont} can respectively be found in Appendix~\ref{sec:proof_mmse_dec} and~\ref{sec:proof_mmse_cont}.
-\\
-
-We present now the very useful ``I-MMSE'' relation from~\cite{guo2005mutual}. This relation was previously known (under a different formulation) as ``de Brujin identity'' see \cite[Equation 2.12]{stam1959some}.
-\begin{proposition}\label{prop:i_mmse}
-	For all $\lambda \geq 0$,
-	\begin{equation}\label{eq:i_mmse}
-		\frac{\partial}{\partial \lambda} I(\bbf{X};\bbf{Y}) = \frac{1}{2} \MMSE(\lambda)
-		\qquad \text{and} \qquad
-		F'(\lambda) = \frac{1}{2} \E \langle \bbf{x}^{\sT} \bbf{X} \rangle_{\lambda} 
-		= \frac{1}{2} \big(\E \| \bbf{X}\|^2 - \MMSE(\lambda) \big)
-		\,.
-	\end{equation}
-	$F$ thus is a convex, differentiable, non-decreasing, and $\frac{1}{2}\E\|\bbf{X}\|^2$-Lipschitz function over $\R_{\geq 0}$. If $P_X$ is not a Dirac mass, then $F$ is strictly convex.
-\end{proposition}
-Proposition~\ref{prop:i_mmse} is proved in Appendix~\ref{sec:proof_i_mmse}.
-Proposition~\ref{prop:i_mmse} reduces the computation of the MMSE to the computation of the free energy. This will be particularly useful because the free energy $F$ is much easier to handle than the MMSE.
-
-We end this section with the simplest model of the form~\eqref{eq:inference}, namely the additive Gaussian scalar channel:
-\begin{equation}\label{eq:additive_scalar_channel}
-	Y = \sqrt{\lambda} X + Z \,,
-\end{equation}
-where $Z \sim \cN(0,1)$ and $X$ is sampled from a distribution $P_0$ over $\R$, independently of $Z$. The corresponding free energy and the MMSE are respectively
-	\begin{equation}\label{eq:def_psi_p0}
-		\psi_{P_0}(\lambda)= \E \log \int dP_0(x)e^{\sqrt{\lambda} \,Y x - \lambda x^2/2}
-		\quad \text{and} \quad \MMSE_{P_0}(\lambda) = \E \big[\big(X - \E[X|Y]\big)^2\big] \,.
-	\end{equation}
-The study of this simple inference channel will be very useful in the following, because we will see that the inference problems that we are going to study enjoy asymptotically a ``decoupling principle'' that reduces them to scalar channels like~\eqref{eq:additive_scalar_channel}.
-%The next proposition summarizes the main properties of the free energy $\psi_{P_0}$ of the channel~\eqref{eq:additive_scalar_channel}. 
-
-%\begin{proposition}\label{prop:additive_scalar_channel}
-	%Let $X \sim P_0$ be a real random variable with finite second moment. For $\lambda \geq 0$, let $Y = \sqrt{\lambda} X + Z$, where $Z \sim \cN(0,1)$ is independent from $X_0$.
-	%Then the function
-	%\begin{equation}\label{eq:def_psi_p0}
-		%\psi_{P_0}: \lambda \mapsto \E \log \int dP_0(x)e^{\sqrt{\lambda} \,Y x - \lambda x^2/2}
-	%\end{equation}
-	%is convex, continuously differentiable, non-decreasing and $\frac{1}{2}\E[X^2]$-Lipschitz on $\R_{\geq 0}$. Moreover, $\psi_{P_0}$ is strictly convex, if $P_0$ is not a Dirac measure.
-%\end{proposition}
-%\begin{proof}
-%\end{proof}
-%\\
-
-Let us compute the mutual information and the MMSE for particular choices of prior distributions:
-\begin{example}[Gaussian prior: $P_0 = \cN(0,1)$]\label{ex:gaussian_psi}
-			In that case $\E[X|Y]$ is simply the orthogonal projection of $X$ on $Y$: 
-			$$
-			\E[X|Y] = \frac{\E[XY]}{\E[Y^2]} Y = \frac{\sqrt{\lambda}}{1+\lambda} Y.
-			$$
-			One deduces $\MMSE_{P_0}(\lambda) = \frac{1}{1+\lambda}$.
-			Using~\eqref{eq:i_mmse}, we get $I(X;Y) = \frac{1}{2} \log(1+\lambda)$ and $\psi_{P_0}(\lambda) = \frac{1}{2}\big(\lambda - \log(1+\lambda)\big)$.
-\end{example}
-
-\begin{remark}[Worst-case prior]\label{rem:worst_case}
-	Let $P_0$ be a probability distribution on $\R$ with unit second moment $\E_{P_0}[X^2] = 1$. By considering the estimator $\widehat{x} = \frac{\sqrt{\lambda}}{1+\lambda} Y$, one obtain $\MMSE_{P_0}(\lambda) \leq \frac{1}{1+ \lambda}$. We conclude:
-	$$
-	\sup_{P_0} \MMSE_{P_0}(\lambda) = \frac{1}{1+\lambda} \qquad \text{and} \qquad
-	\inf_{P_0} \psi_{P_0}(\lambda) = \frac{1}{2}(\lambda - \log(1+\lambda)),
-	$$
-	where the supremum and infimum are both over the probability distributions that have unit second moment. The standard normal distribution $P_0 = \cN(0,1)$ achieves both extrema.
-\end{remark}
-
-\begin{example}[Rademacher prior: $P_0 = \frac{1}{2} \delta_{+1} + \frac{1}{2} \delta_{-1}$] We compute $\psi_{P_0}(\lambda) = \E \log \cosh(\sqrt{\lambda} Z + \lambda)- \frac{\lambda}{2}$ and $I(X;Y) = \lambda - \E \log \cosh(\sqrt{\lambda} Z + \lambda)$. The I-MMSE relation gives
-			\begin{align*}
-				\frac{1}{2} \MMSE(\lambda) 
-				&= \frac{\partial}{\partial \lambda} I(X;Y)
-				= 1 - \E \Big[\big(\frac{1}{2\sqrt{\lambda}}Z+1\big) \tanh\big(\sqrt{\lambda}Z + \lambda\big)\Big]
-				\\
-				&= 1 - \E \tanh(\sqrt{\lambda}Z + \lambda) - \frac{1}{2} \E \tanh'(\sqrt{\lambda}Z + \lambda)
-				\\
-				&= \frac{1}{2} - \E \tanh(\sqrt{\lambda}Z + \lambda) + \frac{1}{2} \E \tanh^2(\sqrt{\lambda}Z + \lambda)
-			\end{align*}
-			where we used Gaussian integration by parts. Since by the Nishimori property $\E \langle x X \rangle_{\lambda} = \E \langle x \rangle_{\lambda}^2$, one has $\E \tanh(\sqrt{\lambda}Z + \lambda) = \E \tanh^2(\sqrt{\lambda}Z + \lambda)$ and therefore $\MMSE(\lambda) = 1 - \E \tanh(\sqrt{\lambda}Z + \lambda)$.
-\end{example}
 
 
 \section{A warm-up: the ``needle in a haystack'' problem}\label{sec:rem}
