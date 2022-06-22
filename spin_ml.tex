@@ -13,6 +13,76 @@
 \section{Intro}
 Bla
 
+\section{Nishimori identity also known as Bayes rule}
+
+The main contribution of this section is the introduction of a very convenient notation that will be used throughout these notes. 
+
+\begin{definition}\label{def:setup-nishimori}
+Let $(\bbf{X},\bbf{Y})$ be a couple of random variables on a polish space. We denote $\langle \cdot \rangle$ the expectation with respect to $\P(\bbf{X}=\cdot \, | \, \bbf{Y})$ and $\E$ the expectation with respect to $(\bbf{X},\bbf{Y})$.
+
+A replica denoted by $\bbf{x}$ is a random variable sampled (given $\bbf{Y}$) from the distribution $\P(\bbf{X}=\cdot \, | \, \bbf{Y})$, independently of every other random variables. For $k \geq 1$, we denote $k$ replicas as $\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}$ being $k$ i.i.d.\ samples (given $\bbf{Y}$) from the distribution $\P(\bbf{X}=\cdot \, | \, \bbf{Y})$, independently of every other random variables.
+\end{definition}
+
+Formally, we defined random variables $(\bbf{X},\bbf{Y},\bbf{x},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)})$ with distribution $P_{(X,Y)}\!\otimes \! P_{(X|Y)}\!\otimes \!\dots \!\otimes \! P_{(X|Y)}$ and a notation $\langle \cdot \rangle$ such that for all continuous bounded function $f$:
+$$
+\langle f(\bbf{X},\bbf{Y},\bbf{x},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}) \rangle \defeq \E \left[ f(\bbf{X},\bbf{Y},\bbf{x},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}) \, | \, \bbf{Y} \right].
+$$
+
+The basic properties of conditional expectation gives:
+\begin{align*}
+\langle \bbf{X} \rangle &= \E\left[ \bbf{X} \, | \, \bbf{Y} \right]\\
+\langle f(\bbf{X})g(\bbf{Y}) \rangle &= \langle f(\bbf{X})\rangle g(\bbf{Y})\\
+\E \langle \bbf{X} \rangle &= \E \left[ \bbf{X} \right].
+\end{align*}
+Moreover, the independence assumption ensures that
+\begin{align*}
+\langle f(\bbf{X})g(\bbf{x}) \rangle &= \langle f(\bbf{X})\rangle \langle g(\bbf{x})\rangle.
+\end{align*}
+
+Thanks to Bayes rule, we have $P_{(X,Y)} = P_{Y}\!\otimes \! P_{(X|Y)}$ so that $(\bbf{X},\bbf{Y})$ has the same law as $(\bbf{x},\bbf{Y})$ and
+\begin{align*}
+\langle \bbf{x} \rangle &= \E\left[ \bbf{x} \, | \, \bbf{Y} \right] = \langle \bbf{X} \rangle
+\end{align*}
+This argument extends easily and $(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)})$ has the same law as $(\bbf{Y},\bbf{x}^{(1)}, \dots,\bbf{x}^{(k-1)}, \bbf{X})$, so that we get the following convenient reformulation:
+\begin{proposition}[Nishimori identity] \label{prop:nishimori}
+With the notations introduced in Definition \ref{def:setup-nishimori}, we have for all continuous bounded function $f$
+	$$
+\big\langle f(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}) \big\rangle
+	=
+\big\langle f(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k-1)}, \bbf{X}) \big\rangle\,.
+	$$
+\end{proposition}
+
+We will now use the Nishimori identity in the particular case of two random vectors $\bbf{X}$ and $\bbf{Y}$ that live respectively in $\R^n$ and $\R^m$.
+In this setting, we have useful relations:
+\begin{align*}
+\langle \bbf{X}^T \bbf{x} \rangle &=  \langle \bbf{X} \rangle^T \langle \bbf{x} \rangle =\| \langle \bbf{x} \rangle\|^2,
+\end{align*}
+where the first equality follows from the independence assumption and the second one from Nishimori identity. Moreover, we have
+\begin{align*}
+\E \left[ \bbf{X}^T \langle \bbf{x} \rangle \right] &=  \E \left[\langle \bbf{X}^T \bbf{x} \rangle\right] = \E \left[\| \langle \bbf{x} \rangle\|^2 \right],
+\end{align*}
+so that we obtain the classical result:
+\begin{proposition}
+$\langle \bbf{x} \rangle$ is the orthognal projection of $\bbf{X}$ on $L^2(\bbf{Y})$:
+\begin{align*}
+\E \left[ (\bbf{X}- \langle \bbf{x} \rangle)^T \langle \bbf{x} \rangle \right] = 0.
+\end{align*}
+\end{proposition}
+
+\begin{example}
+In some particular cases, explicit computations can be done. The additive Gaussian scalar channel with Gaussian prior is a very simple case. We define
+\begin{equation}\label{eq:additive_scalar_channel}
+	Y = \sqrt{\lambda} X + Z \,,
+\end{equation}
+where $Z \sim \cN(0,1)$ and $X$ is sampled from a distribution $P_0= \cN(0,1)$ over $\R$, independently of $Z$. We can compute the densities as $p(x) = \cN(x|0,1)$, $p(y|x) = \cN(y|\sqrt{\lambda} x,1)$ so that $p(y) = \cN(y|0, 1+\lambda)$ and the law of the replica is also Gaussian with $p(x|y) =\cN\left(x|\frac{\sqrt{\lambda}}{1+\lambda}y,\frac{1}{1+\lambda}\right)$. In particular, we have
+$$
+\langle x \rangle = \frac{\sqrt{\lambda}}{1+\lambda}Y
+$$
+\end{example}
+
+
+
 \section{Bayesian inference with Gaussian additive noise}\label{sec:i_mmse}
 
 We start with the following model:
