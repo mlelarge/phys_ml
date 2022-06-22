@@ -63,12 +63,40 @@ where the first equality follows from the independence assumption and the second
 \E \left[ \bbf{X}^T \langle \bbf{x} \rangle \right] &=  \E \left[\langle \bbf{X}^T \bbf{x} \rangle\right] = \E \left[\| \langle \bbf{x} \rangle\|^2 \right],
 \end{align*}
 so that we obtain the classical result:
-\begin{proposition}
+\begin{proposition}\label{prop:proj}
 $\langle \bbf{x} \rangle$ is the orthognal projection of $\bbf{X}$ on $L^2(\bbf{Y})$:
 \begin{align*}
 \E \left[ (\bbf{X}- \langle \bbf{x} \rangle)^T \langle \bbf{x} \rangle \right] = 0.
 \end{align*}
 \end{proposition}
+As a direct consequence, we get another classical result about the problem of estimating $\bbf{X}$ when observing $\bbf{Y}$ where
+the performance of an estimator $\widehat{\theta}$ (i.e.\ a measurable function of the observations $\bbf{Y}$) is given by its Mean Squared Error $\MSE(\widehat{\theta}) = \E \| \bbf{X} - \widehat{\theta}(\bbf{Y}) \|^2$.
+%One of our main quantity of interest will be 
+\begin{definition}\label{def:MMSE}
+For a signal $\bbf{X}$ and observations $\bbf{Y}$, the Minimum Mean Squared Error is defined by
+$$
+\MMSE \defeq \min_{\widehat{\theta}} \MSE(\widehat{\theta})= \E \left[ \left\| \bbf{X} - \langle \bbf{x} \rangle \right\|^2 \right] = \E \left[\left\| \bbf{X} \right\|^2 \right]- \E\left[\langle \bbf{x}^T\bbf{X}\rangle \right],
+$$
+where the minimum is taken over all measurable function $\widehat{\theta}$ of the observations $\bbf{Y}$. 
+The optimal estimator (in term of Mean Squared Error) is the posterior mean of the signal $\bbf{X}$ given $\bbf{Y}$.
+\end{definition}
+\begin{proof}
+Using $\langle \bbf{X}^T\widehat{\theta}(\bbf{Y})\rangle  = \langle \bbf{X}\rangle^T \widehat{\theta}(\bbf{Y})$, we have
+\begin{align*}
+\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \bbf{X}\right\|^2\right] - 2 \E \left[ \langle \bbf{X}\rangle^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]
+\end{align*}
+and 
+\begin{align*}
+\E \left[ \left\|\langle \bbf{X}\rangle -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \langle \bbf{X}\rangle\right\|^2\right] - 2 \E \left[ \langle \bbf{X}\rangle^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]\geq 0,
+\end{align*}
+we deduce
+\begin{align*}
+\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & \geq \E\left[ \left\| \bbf{X}\right\|^2\right] - \E\left[ \left\| \langle \bbf{X}\rangle\right\|^2\right]\\
+& = \E\left[ \left\| \bbf{X}\right\|^2\right] -2\E \left[ \langle \bbf{X}\rangle^T\langle \bbf{X}\rangle \right] + \E\left[ \left\| \langle \bbf{X}\rangle\right\|^2\right]\\
+& = \E \left[ \left\| \bbf{X} - \langle \bbf{X}\rangle \right\|^2 \right]= \E \left[ \left\| \bbf{X} - \langle \bbf{x} \rangle \right\|^2 \right],
+\end{align*}
+and the last equality follows from Proposition \ref{prop:proj}.
+\end{proof}
 
 \begin{example}
 In some particular cases, explicit computations can be done. The additive Gaussian scalar channel with Gaussian prior is a very simple case. We define
@@ -77,9 +105,11 @@ In some particular cases, explicit computations can be done. The additive Gaussi
 \end{equation}
 where $Z \sim \cN(0,1)$ and $X$ is sampled from a distribution $P_0= \cN(0,1)$ over $\R$, independently of $Z$. We can compute the densities as $p(x) = \cN(x|0,1)$, $p(y|x) = \cN(y|\sqrt{\lambda} x,1)$ so that $p(y) = \cN(y|0, 1+\lambda)$ and the law of the replica is also Gaussian with $p(x|y) =\cN\left(x|\frac{\sqrt{\lambda}}{1+\lambda}y,\frac{1}{1+\lambda}\right)$. In particular, we have
 $$
-\langle x \rangle = \frac{\sqrt{\lambda}}{1+\lambda}Y
+\langle x \rangle = \frac{\sqrt{\lambda}}{1+\lambda}Y = \frac{\lambda}{1+\lambda}X+\frac{\sqrt{\lambda}}{1+\lambda}Z, \text{ and, }  \E \left[\langle X  x \rangle \right] = \frac{\lambda}{1+\lambda}.
 $$
+In particular, we have $\MMSE(\lambda) = \frac{1}{1+\lambda}$.
 \end{example}
+
 
 
 
@@ -94,32 +124,8 @@ The parameter $\lambda \geq 0$ plays the role of a signal-to-noise ratio.
 We assume that $P_X$ admits a finite second moment: $\E \|\bbf{X}\|^2 < \infty$. No other assumption is made on $P_X$. In particular, the fact that the noise is i.i.d. in the dimension $n$ will be crucial in the computation below but no such assumption is made on the signal which is allowed to have any complicated structure component-wise.
 
 Given the observation channel~\eqref{eq:inference}, the goal of the statistician is to estimate $\bbf{X}$ given the observations $\bbf{Y}$. We assume to be in the ``Bayes-optimal'' setting, where the statistician knows all the parameters of the inference model, that is the prior distribution $P_X$ and the signal-to-noise ratio $\lambda$. 
-As will be clear below, the Mean Squared Error (MSE) is the natural measure of performance when dealing with Gaussian noise. In this section, we measure the performance of an estimator $\widehat{\theta}$ (i.e.\ a measurable function of the observations $\bbf{Y}$) by its Mean Squared Error $\MSE(\widehat{\theta}) = \E \| \bbf{X} - \widehat{\theta}(\bbf{Y}) \|^2$.
-%One of our main quantity of interest will be 
-\begin{definition}\label{def:MMSE}
-For a signal $\bbf{X}$ and observations $\bbf{Y}$, the Minimum Mean Squared Error is defined by
-$$
-\MMSE(\lambda) \defeq \min_{\widehat{\theta}} \MSE(\widehat{\theta})= \E \left[ \left\| \bbf{X} - \E[\bbf{X}|\bbf{Y}] \right\|^2 \right],
-$$
-where the minimum is taken over all measurable function $\widehat{\theta}$ of the observations $\bbf{Y}$. 
-The optimal estimator (in term of Mean Squared Error) is the posterior mean of the signal $\bbf{X}$ given $\bbf{Y}$.
-\end{definition}
-\begin{proof}
-Using $\E[\bbf{X}^T\widehat{\theta}(\bbf{Y})|\bbf{Y}]  = \E[\bbf{X}|\bbf{Y}]^T \widehat{\theta}(\bbf{Y})$, we have
-\begin{align*}
-\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \bbf{X}\right\|^2\right] - 2 \E \left[ \E[\bbf{X}|\bbf{Y}]^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]
-\end{align*}
-and 
-\begin{align*}
-\E \left[ \left\| \E[\bbf{X}|\bbf{Y}] -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \E[\bbf{X}|\bbf{Y}]\right\|^2\right] - 2 \E \left[ \E[\bbf{X}|\bbf{Y}]^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]\geq 0,
-\end{align*}
-we deduce
-\begin{align*}
-\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & \geq \E\left[ \left\| \bbf{X}\right\|^2\right] - \E\left[ \left\| \E[\bbf{X}|\bbf{Y}]\right\|^2\right]\\
-& = \E\left[ \left\| \bbf{X}\right\|^2\right] -2\E \left[ \E[\bbf{X}|\bbf{Y}]^T\E[\bbf{X}|\bbf{Y}] \right] + \E\left[ \left\| \E[\bbf{X}|\bbf{Y}]\right\|^2\right]\\
-& = \E \left[ \left\| \bbf{X} - \E[\bbf{X}|\bbf{Y}] \right\|^2 \right]
-\end{align*}
-\end{proof}
+As will be clear below, the Mean Squared Error (MSE) is the natural measure of performance when dealing with Gaussian noise.
+% In this section, we measure 
 
 Following Definition \ref{def:MMSE}, we see that a natural object to study is the posterior distribution of $\bbf{X}$.
 We have for the joint distribution:
