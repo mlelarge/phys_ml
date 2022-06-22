@@ -4,6 +4,7 @@
 \usepackage{latex_style/notations}
 
 \title{Spin models and ML}
+\author{Marc Lelarge, Léo Miolane}
 \date{}
 
 \begin{document}
@@ -28,7 +29,7 @@ $$
 \langle f(\bbf{X},\bbf{Y},\bbf{x},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}) \rangle \defeq \E \left[ f(\bbf{X},\bbf{Y},\bbf{x},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}) \, | \, \bbf{Y} \right].
 $$
 
-The basic properties of conditional expectation gives:
+The basic properties of conditional expectation give:
 \begin{align*}
 \langle \bbf{X} \rangle &= \E\left[ \bbf{X} \, | \, \bbf{Y} \right]\\
 \langle f(\bbf{X})g(\bbf{Y}) \rangle &= \langle f(\bbf{X})\rangle g(\bbf{Y})\\
@@ -52,9 +53,10 @@ With the notations introduced in Definition \ref{def:setup-nishimori}, we have f
 \big\langle f(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k-1)}, \bbf{X}) \big\rangle\,.
 	$$
 \end{proposition}
+This identity is named after the works of Nishimori \cite{nishimori1980exact,nishimori1981internal} on ``gauge-symmetric'' spin glasses.
 
 We will now use the Nishimori identity in the particular case of two random vectors $\bbf{X}$ and $\bbf{Y}$ that live respectively in $\R^n$ and $\R^m$.
-In this setting, we have useful relations:
+We typically think of $\bbf{X}$ as the signal and $\bbf{Y}$ as the observations. We can compare the original signal $\bbf{X}$ with its posterior:
 \begin{align*}
 \langle \bbf{X}^T \bbf{x} \rangle &=  \langle \bbf{X} \rangle^T \langle \bbf{x} \rangle =\| \langle \bbf{x} \rangle\|^2,
 \end{align*}
@@ -69,7 +71,7 @@ $\langle \bbf{x} \rangle$ is the orthognal projection of $\bbf{X}$ on $L^2(\bbf{
 \E \left[ (\bbf{X}- \langle \bbf{x} \rangle)^T \langle \bbf{x} \rangle \right] = 0.
 \end{align*}
 \end{proposition}
-As a direct consequence, we get another classical result about the problem of estimating $\bbf{X}$ when observing $\bbf{Y}$ where
+As a direct consequence, we get another classical result about the problem of estimating the signal $\bbf{X}$ when observing $\bbf{Y}$ where
 the performance of an estimator $\widehat{\theta}$ (i.e.\ a measurable function of the observations $\bbf{Y}$) is given by its Mean Squared Error $\MSE(\widehat{\theta}) = \E \| \bbf{X} - \widehat{\theta}(\bbf{Y}) \|^2$.
 %One of our main quantity of interest will be 
 \begin{definition}\label{def:MMSE}
@@ -83,13 +85,13 @@ The optimal estimator (in term of Mean Squared Error) is the posterior mean of t
 \begin{proof}
 Using $\langle \bbf{X}^T\widehat{\theta}(\bbf{Y})\rangle  = \langle \bbf{X}\rangle^T \widehat{\theta}(\bbf{Y})$, we have
 \begin{align*}
-\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \bbf{X}\right\|^2\right] - 2 \E \left[ \langle \bbf{X}\rangle^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]
+\E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \bbf{X}\right\|^2\right] - 2 \E \left[ \langle \bbf{X}\rangle^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right].
 \end{align*}
-and 
+Note that
 \begin{align*}
 \E \left[ \left\|\langle \bbf{X}\rangle -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & = \E\left[ \left\| \langle \bbf{X}\rangle\right\|^2\right] - 2 \E \left[ \langle \bbf{X}\rangle^T \widehat{\theta}(\bbf{Y})\right] + \E\left[ \left\| \widehat{\theta}(\bbf{Y})\right\|^2\right]\geq 0,
 \end{align*}
-we deduce
+so that we deduce
 \begin{align*}
 \E \left[ \left\| \bbf{X} -  \widehat{\theta}(\bbf{Y})\right\|^2 \right] & \geq \E\left[ \left\| \bbf{X}\right\|^2\right] - \E\left[ \left\| \langle \bbf{X}\rangle\right\|^2\right]\\
 & = \E\left[ \left\| \bbf{X}\right\|^2\right] -2\E \left[ \langle \bbf{X}\rangle^T\langle \bbf{X}\rangle \right] + \E\left[ \left\| \langle \bbf{X}\rangle\right\|^2\right]\\
@@ -99,11 +101,11 @@ and the last equality follows from Proposition \ref{prop:proj}.
 \end{proof}
 
 \begin{example}
-In some particular cases, explicit computations can be done. The additive Gaussian scalar channel with Gaussian prior is a very simple case. We define
+In some particular cases, explicit computations can be done. The additive Gaussian scalar channel with Gaussian prior is a very simple case defined by:
 \begin{equation}\label{eq:additive_scalar_channel}
 	Y = \sqrt{\lambda} X + Z \,,
 \end{equation}
-where $Z \sim \cN(0,1)$ and $X$ is sampled from a distribution $P_0= \cN(0,1)$ over $\R$, independently of $Z$. We can compute the densities as $p(x) = \cN(x|0,1)$, $p(y|x) = \cN(y|\sqrt{\lambda} x,1)$ so that $p(y) = \cN(y|0, 1+\lambda)$ and the law of the replica is also Gaussian with $p(x|y) =\cN\left(x|\frac{\sqrt{\lambda}}{1+\lambda}y,\frac{1}{1+\lambda}\right)$. In particular, we have
+where $Z \sim \cN(0,1)$ and $X\sim\cN(0,1)$, independently of $Z$. We can compute the densities as $p(x) = \cN(x|0,1)$, $p(y|x) = \cN(y|\sqrt{\lambda} x,1)$ so that $p(y) = \cN(y|0, 1+\lambda)$ and the law of the replica is also Gaussian with $p(x|y) =\cN\left(x|\frac{\sqrt{\lambda}}{1+\lambda}y,\frac{1}{1+\lambda}\right)$. In particular, we have
 $$
 \langle x \rangle = \frac{\sqrt{\lambda}}{1+\lambda}Y = \frac{\lambda}{1+\lambda}X+\frac{\sqrt{\lambda}}{1+\lambda}Z, \text{ and, }  \E \left[\langle X  x \rangle \right] = \frac{\lambda}{1+\lambda}.
 $$
@@ -310,36 +312,8 @@ Let us compute the mutual information and the MMSE for particular choices of pri
 \end{example}
 
 
-\section{Bayes-optimal inference}
-We introduce in this chapter some general properties of Bayes-optimal inference, that will be used repeatedly in the sequel.
-Let us first define what we mean by \textit{Bayes-optimal inference}.
 
-We consider a statistical problem where we would like to recover a signal vector $\bbf{X} \in \R^n$ from some observations $\bbf{Y} \in \R^m$.
-We assume that $(\bbf{X},\bbf{Y})$ is drawn from some probability distribution $\mu$ over $\R^{n} \times \R^m$. Given a performance criterion, a Bayes-optimal estimator (or simply Bayes estimator) is an estimator of $\bbf{X}$ given $\bbf{Y}$ that achieves the best performance for this criterion. For instance if we measure the performance of an estimator $\what{\bbf{x}}$ by its mean square error $\MSE(\what{\bbf{x}}) = \E \| \bbf{X} - \what{\bbf{x}}(\bbf{Y}) \|^2$, then the Bayes-optimal estimator is simply the posterior mean $\what{\bbf{x}}^{\rm Bayes}(\bbf{Y}) = \E[\bbf{X}|\bbf{Y}]$.
-\\
 
-The goal of this chapter is to present some general properties of Bayes-optimal estimators. In Section~\ref{sec:nishimori} we introduce what we will call (according to the statistical physics terminology) the ``Nishimori identity'' which is nothing more than a rewriting of Bayes rule.
-In Section~\ref{sec:performance} we will study the links between various natural performance metrics for estimators and show that they are in some sense equivalent.
-In Sections~\ref{sec:i_mmse} we analyse the special case where $\bbf{Y} = \sqrt{\lambda}\bbf{X} + \bbf{Z}$, where $\lambda \geq 0$ and $\bbf{Z}$ is some Gaussian noise. This is the starting point of the study of the ``spiked'' matrix and tensor models. Finally we consider in Section~\ref{sec:rem} a simple example to illustrate the tools of this chapter.
-
-\section{The Nishimori identity}\label{sec:nishimori}
-
-In order to analyze Bayes-optimal estimators, we will need to examine the posterior distribution of $\bbf{X}$ given $\bbf{Y}$.
-To do so we will often consider i.i.d.\ samples $\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}$ from the posterior distribution $P( \cdot \, | \, \bbf{Y} )$, independently of everything else. Such samples are called replicas. The (obvious) identity below (which is simply Bayes rule)
-is named after the works of Nishimori \cite{nishimori1980exact,nishimori1981internal} on ``gauge-symmetric'' spin glasses.
-It states that the planted solution $\bbf{X}$ behaves like a replica.
-
-\begin{proposition}[Nishimori identity] \label{prop:nishimori}
-	Let $(\bbf{X},\bbf{Y})$ be a couple of random variables on a polish space. Let $k \geq 1$ and let $\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}$ be $k$ i.i.d.\ samples (given $\bbf{Y}$) from the distribution $\P(\bbf{X}=\cdot \, | \, \bbf{Y})$, independently of every other random variables. Let us denote $\langle \cdot \rangle$ the expectation with respect to $\P(\bbf{X}=\cdot \, | \, \bbf{Y})$ and $\E$ the expectation with respect to $(\bbf{X},\bbf{Y})$. Then, for all continuous bounded function $f$
-	$$
-	\E \big\langle f(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k)}) \big\rangle
-	=
-	\E \big\langle f(\bbf{Y},\bbf{x}^{(1)}, \dots, \bbf{x}^{(k-1)}, \bbf{X}) \big\rangle\,.
-	$$
-\end{proposition}
-\begin{proof}
-It is equivalent to sample the couple $(\bbf{X},\bbf{Y})$ according to its joint distribution or to sample first $\bbf{Y}$ according to its marginal distribution and then to sample $\bbf{X}$ conditionally to $\bbf{Y}$ from its conditional distribution $\P(\bbf{X}=\cdot \,|\,\bbf{Y})$. Thus the $(k+1)$-tuple $(\bbf{Y},\bbf{x}^{(1)}, \dots,\bbf{x}^{(k)})$ is equal in law to $(\bbf{Y},\bbf{x}^{(1)},\dots,\bbf{x}^{(k-1)},\bbf{X})$.
-\end{proof}
 
 
 \section{Performance measure and optimal estimators}\label{sec:performance}
@@ -689,5 +663,8 @@ of $\sigma_0$ is easy to analyze. Indeed, $\max_{\sigma} Z_{\sigma} \simeq \sqrt
 	\\
 
 	Let $\lambda_0 > 0$. The family of random variables $\big(\| \bbf{X} - \langle \bbf{x}\rangle_{\lambda}\|^2\big)_{\lambda \geq \lambda_0}$ is bounded in $L^2$ by Lemma~\ref{lem:ui1} and is therefore uniformly integrable. The function $\lambda \mapsto \| \bbf{X} - \langle \bbf{x}\rangle_{\lambda}\|^2$ is continuous on $[\lambda_0,+\infty)$, the uniform integrability ensures then that $\MMSE: \lambda \mapsto  \E\| \bbf{X} - \langle \bbf{x}\rangle_{\lambda}\|^2$ is continuous over $[\lambda_0,+\infty)$. This is valid for all $\lambda_0 >0$: we conclude that $\MMSE$ is continuous over $(0,+\infty)$.
+
+%\bibliographystyle{plain}
+%\bibliography{../formule_RS/references.bib}
 
 \end{document}
